@@ -115,7 +115,7 @@ export const CustomerDetails = () => {
         </S.MainContent>
 
         <S.Sidebar>
-          <OrderHistorySidebar customerId={customer.id} />
+          <OrderHistorySidebar customer={customer} />
         </S.Sidebar>
       </S.ContentGrid>
     </S.CustomerDetailsContainer>

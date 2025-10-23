@@ -9,6 +9,11 @@ export const LayoutContainer = styled.div`
 
 export const MainContent = styled.main`
   flex: 1;
+  padding: ${(props) => props.theme.SPACING.XL} 0;
+
+  @media (max-width: 768px) {
+    padding: ${(props) => props.theme.SPACING.LG} 0;
+  }
 `
 
 export const Container = styled.div`

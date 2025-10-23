@@ -1,28 +1,16 @@
 import { UsersService } from '@application/users/services';
-import {
-  AddUserAddress,
-  ChangeUserPassword,
-  RemoveUserAddress,
-  UpdateUser,
-  UpdateUserAddress,
-} from '@application/users/use-cases';
 import { Injectable } from '@nestjs/common';
 import { UserDTO } from '@presentation/common/users/dtos';
-import { PaginatedResultDTO } from '@presentation/dtos/paginated-result.dto';
-import { PaginationParamsDTO } from '@presentation/dtos/pagination-params.dto';
+
+import { UserRole } from '@/domain/user/enums/role.enum';
+import { PaginatedResultDTO } from '@/presentation/dtos/paginated-result.dto';
+import { PaginationParamsDTO } from '@/presentation/dtos/pagination-params.dto';
 
 import { MinUserDTO } from './dtos';
 
 @Injectable()
 export class UsersWebService {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly changeUserPassword: ChangeUserPassword,
-    private readonly updateUser: UpdateUser,
-    private readonly addUserAddress: AddUserAddress,
-    private readonly updateUserAddress: UpdateUserAddress,
-    private readonly removeUserAddress: RemoveUserAddress,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   public async findById(id: string): Promise<UserDTO> {
     const user = await this.usersService.findByIdOrThrow(id);
@@ -33,10 +21,16 @@ export class UsersWebService {
     params: PaginationParamsDTO,
     filters: Record<string, any> = {},
   ): Promise<PaginatedResultDTO<MinUserDTO>> {
+    // Add filter to exclude admin users from customer list
+    const customersOnlyFilters = {
+      ...filters,
+      role: UserRole.USER,
+    };
+
     const result = await this.usersService.findAll(
       params.page,
       params.limit,
-      filters,
+      customersOnlyFilters,
       params.orderBy,
     );
 

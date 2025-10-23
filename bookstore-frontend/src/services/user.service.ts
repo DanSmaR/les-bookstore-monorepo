@@ -89,11 +89,8 @@ export class UserService {
   /**
    * Update user data
    */
-  static async updateUser(
-    id: string,
-    userData: UpdateUserData,
-  ): Promise<UserDTO> {
-    const response = await AxiosApp.put<UserDTO>(`/users/${id}`, userData)
+  static async updateUser(userData: UpdateUserData): Promise<UserDTO> {
+    const response = await AxiosApp.put<UserDTO>('/me', userData)
     return response.data
   }
 
@@ -101,25 +98,23 @@ export class UserService {
    * Change user password
    */
   static async changePassword(
-    id: string,
     passwordData: Omit<PasswordChangeData, 'confirmPassword'>,
   ): Promise<void> {
     const changePasswordPayload = {
       oldPassword: passwordData.currentPassword,
       newPassword: passwordData.newPassword,
     }
-    await AxiosApp.put(`/users/${id}/password`, changePasswordPayload)
+    await AxiosApp.put('/me/password', changePasswordPayload)
   }
 
   /**
    * Create user address
    */
   static async createAddress(
-    userId: string,
     addressData: CreateAddressData,
   ): Promise<AddressDTO> {
     const response = await AxiosApp.post<AddressDTO>(
-      `/users/${userId}/addresses`,
+      '/me/addresses',
       addressData,
     )
     return response.data
@@ -129,12 +124,11 @@ export class UserService {
    * Update user address
    */
   static async updateAddress(
-    userId: string,
     addressId: string,
     addressData: Partial<CreateAddressData>,
   ): Promise<AddressDTO> {
     const response = await AxiosApp.put<AddressDTO>(
-      `/users/${userId}/addresses/${addressId}`,
+      `/me/addresses/${addressId}`,
       addressData,
     )
     return response.data
@@ -143,17 +137,15 @@ export class UserService {
   /**
    * Delete user address
    */
-  static async deleteAddress(userId: string, addressId: string): Promise<void> {
-    await AxiosApp.delete(`/users/${userId}/addresses/${addressId}`)
+  static async deleteAddress(addressId: string): Promise<void> {
+    await AxiosApp.delete(`/me/addresses/${addressId}`)
   }
 
   /**
    * Get user addresses
    */
-  static async getUserAddresses(userId: string): Promise<AddressDTO[]> {
-    const response = await AxiosApp.get<AddressDTO[]>(
-      `/users/${userId}/addresses`,
-    )
+  static async getUserAddresses(): Promise<AddressDTO[]> {
+    const response = await AxiosApp.get<AddressDTO[]>(`/me/addresses`)
     return response.data
   }
 

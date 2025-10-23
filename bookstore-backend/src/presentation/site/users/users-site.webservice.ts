@@ -1,6 +1,7 @@
 import { UsersService } from '@application/users/services';
 import {
   AddUserAddress,
+  AddUserCard,
   ChangeUserPassword,
   RemoveUserAddress,
   UpdateUser,
@@ -9,9 +10,13 @@ import {
 import { Injectable } from '@nestjs/common';
 import { AddressDTO, UserDTO } from '@presentation/common/users/dtos';
 
+import { RemoveUserCard } from '@/application/users/use-cases/cards/remove-user-card.usecase';
+import { CardDTO } from '@/presentation/common/users/dtos/card.dto';
+
 import {
   ChangePasswordDTO,
   CreateAddressDTO,
+  CreateCardDTO,
   UpdateAddressDTO,
   UpdateUserDTO,
 } from './dtos';
@@ -25,6 +30,8 @@ export class UsersSiteWebService {
     private readonly addUserAddress: AddUserAddress,
     private readonly updateUserAddress: UpdateUserAddress,
     private readonly removeUserAddress: RemoveUserAddress,
+    private readonly addUserCard: AddUserCard,
+    private readonly removeUserCard: RemoveUserCard,
   ) {}
 
   public async getProfile(userId: string): Promise<UserDTO> {
@@ -84,5 +91,18 @@ export class UsersSiteWebService {
 
   public async deleteAddress(userId: string, addressId: string): Promise<void> {
     await this.removeUserAddress.execute(userId, addressId);
+  }
+
+  public async getCards(userId: string): Promise<CardDTO[]> {
+    const user = await this.usersService.findActiveByIdOrThrow(userId);
+    return user.customerDetails.cards.map((card) => new CardDTO(card));
+  }
+
+  public async addCard(userId: string, dto: CreateCardDTO): Promise<CardDTO> {
+    return new CardDTO(await this.addUserCard.execute(userId, dto));
+  }
+
+  public async removeCard(userId: string, cardId: string): Promise<void> {
+    await this.removeUserCard.execute(userId, cardId);
   }
 }

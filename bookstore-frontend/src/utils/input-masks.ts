@@ -67,6 +67,58 @@ export const formatDate = (value: string): string => {
 }
 
 // Remove mask to get clean value for validation/submission
+export const formatISBN = (value: string): string => {
+  // Remove all non-digits and X
+  const cleanValue = value.replace(/[^0-9X]/gi, '').toUpperCase()
+
+  if (cleanValue.length <= 10) {
+    // ISBN-10 format: X-XXX-XXXXX-X
+    return cleanValue
+      .replace(/(\d{1})(\d)/, '$1-$2')
+      .replace(/(\d{1}-\d{3})(\d)/, '$1-$2')
+      .replace(/(\d{1}-\d{3}-\d{5})(\d|X)/, '$1-$2')
+  } else {
+    // ISBN-13 format: XXX-X-XX-XXXXXX-X
+    return cleanValue
+      .slice(0, 13)
+      .replace(/(\d{3})(\d)/, '$1-$2')
+      .replace(/(\d{3}-\d{1})(\d)/, '$1-$2')
+      .replace(/(\d{3}-\d{1}-\d{2})(\d)/, '$1-$2')
+      .replace(/(\d{3}-\d{1}-\d{2}-\d{6})(\d)/, '$1-$2')
+  }
+}
+
+export const formatCreditCard = (value: string): string => {
+  // Remove all non-digits
+  const digits = value.replace(/\D/g, '')
+
+  // Apply credit card mask: 0000 0000 0000 0000
+  if (digits.length <= 16) {
+    return digits.replace(/(\d{4})(?=\d)/g, '$1 ')
+  }
+
+  // If more than 16 digits, truncate and format
+  return digits.slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ')
+}
+
+export const formatCardExpiry = (value: string): string => {
+  // Remove all non-digits
+  const digits = value.replace(/\D/g, '')
+
+  // Apply expiry mask: MM/YY
+  if (digits.length <= 4) {
+    return digits.replace(/(\d{2})(\d)/, '$1/$2')
+  }
+
+  // If more than 4 digits, truncate and format
+  return digits.slice(0, 4).replace(/(\d{2})(\d{2})/, '$1/$2')
+}
+
+export const formatCardCVV = (value: string): string => {
+  // Remove all non-digits and limit to 4 characters (for American Express)
+  return value.replace(/\D/g, '').slice(0, 4)
+}
+
 export const removeMask = (value: string): string => {
   return value.replace(/\D/g, '')
 }
@@ -115,6 +167,12 @@ export const convertToMaskedFormat = {
     if (!rawZipCode) return ''
     return formatZipCode(rawZipCode)
   },
+
+  // Apply ISBN mask to raw ISBN data
+  isbn: (rawISBN: string): string => {
+    if (!rawISBN) return ''
+    return formatISBN(rawISBN)
+  },
 }
 
 // Convert masked format back to backend format
@@ -151,5 +209,10 @@ export const convertFromMaskedFormat = {
   // Remove ZIP code mask for backend
   zipCode: (maskedZipCode: string): string => {
     return removeMask(maskedZipCode)
+  },
+
+  // Remove ISBN mask for backend
+  isbn: (maskedISBN: string): string => {
+    return maskedISBN.replace(/[^0-9X]/gi, '').toUpperCase()
   },
 }

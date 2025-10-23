@@ -155,10 +155,19 @@ export const AddressForm = ({
         </FormSection>
 
         <S.FormActions>
-          <Button variant="ghost" onClick={onCancel} disabled={loading}>
+          <Button
+            variant="ghost"
+            onClick={onCancel}
+            disabled={loading}
+            data-testid="address-form-cancel-button"
+          >
             Cancelar
           </Button>
-          <Button type="submit" loading={loading}>
+          <Button
+            type="submit"
+            loading={loading}
+            data-testid="address-form-submit-button"
+          >
             {address ? 'Atualizar Endereço' : 'Adicionar Endereço'}
           </Button>
         </S.FormActions>

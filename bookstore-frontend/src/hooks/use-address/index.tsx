@@ -29,7 +29,7 @@ export const useAddress = () => {
       setAddressState((prev) => ({ ...prev, isSaving: true, error: null }))
 
       try {
-        const newAddress = await UserService.createAddress(userId, addressData)
+        const newAddress = await UserService.createAddress(addressData)
 
         setAddressState((prev) => ({ ...prev, isSaving: false }))
 
@@ -62,7 +62,6 @@ export const useAddress = () => {
 
       try {
         const updatedAddress = await UserService.updateAddress(
-          userId,
           addressId,
           addressData,
         )
@@ -93,7 +92,7 @@ export const useAddress = () => {
       setAddressState((prev) => ({ ...prev, isSaving: true, error: null }))
 
       try {
-        await UserService.deleteAddress(userId, addressId)
+        await UserService.deleteAddress(addressId)
 
         setAddressState((prev) => ({ ...prev, isSaving: false }))
 
@@ -120,7 +119,7 @@ export const useAddress = () => {
     setAddressState((prev) => ({ ...prev, isLoading: true, error: null }))
 
     try {
-      const addresses = await UserService.getUserAddresses(userId)
+      const addresses = await UserService.getUserAddresses()
 
       setAddressState((prev) => ({ ...prev, isLoading: false }))
 

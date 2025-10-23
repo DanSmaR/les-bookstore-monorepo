@@ -74,6 +74,7 @@ export const AddressList = ({
                     variant="ghost"
                     size="sm"
                     onClick={() => onEdit(address)}
+                    data-testid="profile-address-edit-button"
                     disabled={loading}
                   >
                     Editar

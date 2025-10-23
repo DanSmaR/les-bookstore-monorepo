@@ -15,7 +15,9 @@ import { AddressDTO, UserDTO } from '@presentation/common/users/dtos';
 import { UserRole } from '@/domain/user/enums/role.enum';
 import { Roles } from '@/infrastructure/auth/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from '@/infrastructure/auth/guards';
+import { CardDTO } from '@/presentation/common/users/dtos/card.dto';
 
+import { CreateCardDTO } from './dtos';
 import { ChangePasswordDTO } from './dtos/change-password.dto';
 import { CreateAddressDTO } from './dtos/create-address.dto';
 import { UpdateAddressDTO } from './dtos/update-address.dto';
@@ -93,5 +95,28 @@ export class UsersSiteController {
     @Param('addressId') addressId: string,
   ): Promise<void> {
     await this.usersWebService.deleteAddress(req.user.userId, addressId);
+  }
+
+  @Get('cards')
+  public async getCards(
+    @Request() req: AuthenticatedRequest,
+  ): Promise<CardDTO[]> {
+    return await this.usersWebService.getCards(req.user.userId);
+  }
+
+  @Post('cards')
+  public async addCard(
+    @Request() req: AuthenticatedRequest,
+    @Body() body: CreateCardDTO,
+  ): Promise<CardDTO> {
+    return await this.usersWebService.addCard(req.user.userId, body);
+  }
+
+  @Delete('cards/:cardId')
+  public async removeCard(
+    @Request() req: AuthenticatedRequest,
+    @Param('cardId') cardId: string,
+  ): Promise<void> {
+    await this.usersWebService.removeCard(req.user.userId, cardId);
   }
 }

@@ -1,6 +1,7 @@
-import { UsersService } from '@application/users/services';
+import { CardsService, UsersService } from '@application/users/services';
 import {
   AddUserAddress,
+  AddUserCard,
   ChangeUserPassword,
   CreateNewUser,
   RemoveUserAddress,
@@ -17,13 +18,19 @@ import { UserValidator } from '@application/users/validators/user.validator';
 import { Address } from '@domain/user/address.entity';
 import { CustomerDetails } from '@domain/user/customer-details.entity';
 import { User } from '@domain/user/user.entity';
-import { UsersRepositoryImpl } from '@infrastructure/persistence/typeorm/repositories';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersController } from '@presentation/admin/users/users.controller';
 import { UsersWebService } from '@presentation/admin/users/users.webservice';
 import { UsersSiteController } from '@presentation/site/users/users-site.controller';
 import { UsersSiteWebService } from '@presentation/site/users/users-site.webservice';
+
+import { RemoveUserCard } from '@/application/users/use-cases/cards/remove-user-card.usecase';
+import { Card } from '@/domain/user/card.entity';
+import {
+  CardsRepositoryImpl,
+  UsersRepositoryImpl,
+} from '@/infrastructure/persistence/typeorm/repositories';
 
 const USE_CASES = [
   CreateNewUser,
@@ -32,11 +39,13 @@ const USE_CASES = [
   AddUserAddress,
   UpdateUserAddress,
   RemoveUserAddress,
+  AddUserCard,
+  RemoveUserCard,
 ];
 const VALIDATION_STRATEGIES = [EmailExistenceStrategy, CpfExistenceStrategy];
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, CustomerDetails, Address])],
+  imports: [TypeOrmModule.forFeature([User, CustomerDetails, Address, Card])],
   controllers: [UsersController, UsersSiteController],
   providers: [
     ...VALIDATION_STRATEGIES,
@@ -54,11 +63,16 @@ const VALIDATION_STRATEGIES = [EmailExistenceStrategy, CpfExistenceStrategy];
       provide: 'UsersRepository',
       useClass: UsersRepositoryImpl,
     },
+    {
+      provide: 'CardsRepository',
+      useClass: CardsRepositoryImpl,
+    },
+    CardsService,
     UsersService,
     UsersWebService,
     UsersSiteWebService,
     ...USE_CASES,
   ],
-  exports: [UsersService, ...USE_CASES],
+  exports: [UsersService, CardsService, ...USE_CASES],
 })
 export class UsersModule {}

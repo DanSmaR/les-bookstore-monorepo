@@ -120,6 +120,10 @@ export abstract class CRUDRepository<E extends DomainEntity>
     return this.repository.save(entity);
   }
 
+  public async saveAll(entities: E[]): Promise<E[]> {
+    return this.repository.save(entities);
+  }
+
   public async deleteById(id: string): Promise<void> {
     await this.repository.delete({ id } as FindOptionsWhere<E>);
   }

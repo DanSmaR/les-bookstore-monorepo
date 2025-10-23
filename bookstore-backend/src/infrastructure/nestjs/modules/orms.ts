@@ -1,5 +1,7 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { addTransactionalDataSource } from 'typeorm-transactional';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 export const ORMS = {
@@ -11,15 +13,6 @@ export const ORMS = {
         const nodeEnv = configService.get<string>('NODE_ENV');
         const isTest = nodeEnv === 'test';
 
-        // Debug logging to verify configuration
-        if (isTest) {
-          console.log('🔍 Test Database Configuration:');
-          console.log(`  Host: ${configService.get('DATABASE_HOST')}`);
-          console.log(`  Port: ${configService.get('DATABASE_PORT')}`);
-          console.log(`  Database: ${configService.get('DATABASE_NAME')}`);
-          console.log(`  Environment: ${nodeEnv}`);
-        }
-
         return {
           type: 'postgres',
           host: configService.get('DATABASE_HOST'),
@@ -29,11 +22,12 @@ export const ORMS = {
           database: configService.get('DATABASE_NAME'),
           autoLoadEntities: true,
           namingStrategy: new SnakeNamingStrategy(),
-          // Always sync in test environment to ensure clean state
           synchronize: nodeEnv !== 'production',
-          migrations: [`${__dirname}/migrations/*{.ts,.js}`],
-          migrationsRun: !isTest, // Don't run migrations in test (use synchronize instead)
-          dropSchema: isTest, // Drop schema on each test run for clean state
+          migrations: [
+            `${__dirname}/../../persistence/typeorm/migrations/*{.ts,.js}`,
+          ],
+          migrationsRun: nodeEnv === 'production',
+          dropSchema: isTest,
           ssl:
             nodeEnv === 'production'
               ? {
@@ -42,13 +36,25 @@ export const ORMS = {
                     'true',
                 }
               : false,
-          // Test-specific optimizations
           logging: isTest ? false : ['error'],
           maxQueryExecutionTime: isTest ? 1000 : 10000,
-          // Add retry configuration for test environment
           retryAttempts: isTest ? 3 : 10,
           retryDelay: isTest ? 1000 : 3000,
         };
+      },
+      dataSourceFactory: async (options) => {
+        if (!options) {
+          throw new Error('Invalid TypeORM options passed');
+        }
+
+        // Create and initialize the DataSource
+        const dataSource = new DataSource(options);
+        await dataSource.initialize();
+
+        // Register the DataSource with typeorm-transactional
+        addTransactionalDataSource(dataSource);
+
+        return dataSource;
       },
     }),
 };

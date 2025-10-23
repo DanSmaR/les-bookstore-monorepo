@@ -86,7 +86,7 @@ export class Address extends DomainEntity {
     );
   }
 
-  public override update(props: {
+  public update(props: {
     type: AddressType;
     purpose: AddressPurpose;
     addressName: string;

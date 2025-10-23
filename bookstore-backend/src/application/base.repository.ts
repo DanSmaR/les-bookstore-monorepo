@@ -12,6 +12,7 @@ export interface BaseRepository<E extends DomainEntity> {
     sortOrder?: 'ASC' | 'DESC',
   ): Promise<PaginatedResult<E>>;
   save(entity: E): Promise<E>;
+  saveAll(entities: E[]): Promise<E[]>;
   deleteById(id: string): Promise<void>;
   delete(entity: E): Promise<void>;
 }

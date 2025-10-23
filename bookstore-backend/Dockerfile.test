@@ -1,0 +1,26 @@
+# Use the official Node.js image as the base image
+FROM node:22-bookworm-slim
+
+ENV TZ="America/Sao_Paulo"
+
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory
+WORKDIR /app
+
+# Copy package.json and yarn.lock
+COPY package*.json yarn.lock ./
+
+# Install dependencies
+RUN yarn install
+
+# Copy the rest of the application code
+COPY . .
+
+# Expose the application port
+EXPOSE 3000
+
+# Start the NestJS application in development mode
+CMD ["yarn", "run", "start:dev"]
+

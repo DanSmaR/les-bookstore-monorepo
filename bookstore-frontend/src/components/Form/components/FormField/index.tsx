@@ -2,7 +2,7 @@ import React from 'react'
 import type { FieldValues, Path, UseFormReturn } from 'react-hook-form'
 import { Controller, get } from 'react-hook-form'
 
-import { Input, Select } from '@/components'
+import { Input, Select, Textarea } from '@/components'
 import type { SelectOption } from '@/components/Select'
 
 import { getFieldMask } from './utils'
@@ -21,14 +21,28 @@ interface BaseFormFieldProps<T extends FieldValues> {
 
 interface InputFormFieldProps<T extends FieldValues>
   extends BaseFormFieldProps<T> {
-  type?: 'text' | 'email' | 'password' | 'cpf' | 'phone' | 'date' | 'zipCode'
+  type?:
+    | 'text'
+    | 'email'
+    | 'password'
+    | 'cpf'
+    | 'phone'
+    | 'date'
+    | 'zipCode'
+    | 'isbn'
+    | 'creditCard'
+    | 'cardExpiry'
+    | 'cardCVV'
+    | 'textarea'
   options?: never
+  rows?: number
 }
 
 interface SelectFormFieldProps<T extends FieldValues>
   extends BaseFormFieldProps<T> {
   type: 'select'
   options: SelectOption[]
+  rows?: never
 }
 
 type FormFieldProps<T extends FieldValues> =
@@ -44,6 +58,7 @@ export const FormField = <T extends FieldValues>({
   className,
   disabled = false,
   options,
+  rows,
   'data-testid': dataTestId,
 }: FormFieldProps<T>) => {
   const {
@@ -86,6 +101,23 @@ export const FormField = <T extends FieldValues>({
             data-testid={dataTestId}
           />
         )}
+      />
+    )
+  }
+
+  // Handle textarea type
+  if (type === 'textarea') {
+    return (
+      <Textarea
+        label={label}
+        placeholder={placeholder}
+        className={className}
+        disabled={disabled}
+        error={!!error}
+        errorMessage={errorMessage}
+        rows={rows}
+        data-testid={dataTestId}
+        {...register(name)}
       />
     )
   }

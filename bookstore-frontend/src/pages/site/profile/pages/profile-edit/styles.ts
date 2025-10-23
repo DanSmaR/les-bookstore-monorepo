@@ -1,9 +1,11 @@
 import styled from 'styled-components'
 
-export const Container = styled.div`
+export const ContentContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 `
 
 export const Header = styled.header`

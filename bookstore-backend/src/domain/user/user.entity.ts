@@ -54,11 +54,11 @@ export class User extends DomainEntity implements UserAuthDetails {
       this.password = props.password;
       this.gender = props.gender;
       this.birthDate = props.birthDate;
-      this.customerDetails = new CustomerDetails({});
+      this.customerDetails = new CustomerDetails();
     }
   }
 
-  public override update(props: {
+  public update(props: {
     name: string;
     email: string;
     cpf: string;

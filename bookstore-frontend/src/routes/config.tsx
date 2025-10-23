@@ -9,6 +9,10 @@ import {
   SignUp,
   SiteLayout,
 } from '@/pages'
+import { BooksListing, NewBook } from '@/pages/admin/book-management'
+import { Cart, Catalog } from '@/pages/site/books'
+import { Orders } from '@/pages/site/profile/pages/orders'
+import { PaymentMethods } from '@/pages/site/profile/pages/payment-methods'
 
 import { PATHS, ROUTES } from './constants'
 
@@ -28,11 +32,11 @@ export const adminRoutes = [
   },
   {
     path: PATHS.BOOKS, // 'books' - reusable segment
-    element: <div>Book Management Page</div>,
+    element: <BooksListing />,
   },
   {
     path: `${PATHS.BOOKS}/${PATHS.NEW}`, // 'books/new' - composed from segments
-    element: <div>New Book Form</div>,
+    element: <NewBook />,
   },
 ]
 
@@ -41,9 +45,9 @@ export const routeConfig = [
   {
     path: ROUTES.ADMIN,
     element: (
-      <ProtectedRoute requiredRoles={['admin']}>
-        <AdminLayout />
-      </ProtectedRoute>
+      // <ProtectedRoute requiredRoles={['admin']}>
+      <AdminLayout />
+      // </ProtectedRoute>
     ),
     children: adminRoutes,
   },
@@ -66,10 +70,38 @@ export const routeConfig = [
       {
         path: ROUTES.MY_PROFILE.slice(1), // Remove leading slash for child route
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute requiredRoles={['user']}>
             <ProfileEdit />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: ROUTES.PAYMENT_METHODS.slice(1), // Remove leading slash for child route
+        element: (
+          <ProtectedRoute requiredRoles={['user']}>
+            <PaymentMethods />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: ROUTES.ORDERS.slice(1),
+        element: (
+          <ProtectedRoute requiredRoles={['user']}>
+            <Orders />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: ROUTES.CART.slice(1), // Remove leading slash for child route
+        element: (
+          <ProtectedRoute requiredRoles={['user']}>
+            <Cart />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: ROUTES.CATALOG.slice(1), // Remove leading slash for child route
+        element: <Catalog />,
       },
     ],
   },

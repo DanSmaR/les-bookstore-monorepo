@@ -105,12 +105,6 @@ export const Copyright = styled.p`
   font-size: ${(props) => props.theme.FONT_SIZE.SMALL};
 `
 
-export const PaymentMethods = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${(props) => props.theme.SPACING.MD};
-`
-
 export const PaymentIcon = styled.div`
   height: 24px;
   padding: ${(props) => `${props.theme.SPACING.XS} ${props.theme.SPACING.SM}`};

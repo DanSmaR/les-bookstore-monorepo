@@ -106,10 +106,7 @@ export const useProfileEdit = (): UseProfileEditReturn => {
       if (!customer || !profileData?.id) return
 
       try {
-        const result = await userHook.updateUser(
-          profileData.id,
-          profileData as UpdateUserData,
-        )
+        const result = await userHook.updateUser(profileData as UpdateUserData)
 
         if (result.success) {
           toast.showSuccess('Perfil atualizado com sucesso!')
@@ -156,38 +153,76 @@ export const useProfileEdit = (): UseProfileEditReturn => {
       const dataToSave = addressDataParam || addressFormData
       if (!dataToSave) return
 
+      // Validate that we have all required fields
+      const requiredFields = [
+        'type',
+        'purpose',
+        'addressName',
+        'postalCode',
+        'street',
+        'number',
+        'district',
+        'city',
+        'state',
+      ]
+
+      const hasAllFields = requiredFields.every((field) => dataToSave[field])
+
+      if (!hasAllFields) {
+        console.error('Missing required fields:', {
+          provided: dataToSave,
+          required: requiredFields,
+        })
+        toast.showError('Por favor, preencha todos os campos obrigatórios')
+        return
+      }
+
+      // Ensure we're sending a proper address object, not the ID
+      const addressPayload = {
+        type: dataToSave.type,
+        purpose: dataToSave.purpose,
+        addressName: dataToSave.addressName,
+        postalCode: dataToSave.postalCode,
+        street: dataToSave.street,
+        number: dataToSave.number,
+        complement: dataToSave.complement,
+        district: dataToSave.district,
+        city: dataToSave.city,
+        state: dataToSave.state,
+      }
+
       try {
         if (editingAddress) {
           const result = await addressHook.updateAddress(
             customer.id,
             editingAddress.id,
-            dataToSave as CreateAddressData,
+            addressPayload as CreateAddressData, // Send only the address data, not the ID
           )
 
           if (result.success) {
-            // Reload user data to get updated addresses
-            await userHook.getUserById(customer.id)
             toast.showSuccess('Endereço atualizado com sucesso!')
+            // Refresh the user data to get the updated address
+            await userHook.getCurrentUser()
           } else {
             toast.showError(result.error || 'Erro ao atualizar endereço')
           }
         } else {
           const result = await addressHook.createAddress(
             customer.id,
-            dataToSave as CreateAddressData,
+            addressPayload as CreateAddressData,
           )
 
           if (result.success) {
-            // Reload user data to get updated addresses
-            await userHook.getUserById(customer.id)
             toast.showSuccess('Endereço adicionado com sucesso!')
+            await userHook.getCurrentUser()
           } else {
             toast.showError(result.error || 'Erro ao adicionar endereço')
           }
         }
 
         cancelAddressEditing()
-      } catch {
+      } catch (error) {
+        console.error('Error saving address:', error)
         toast.showError(
           editingAddress
             ? 'Erro ao atualizar endereço'
@@ -263,10 +298,7 @@ export const useProfileEdit = (): UseProfileEditReturn => {
     }
 
     try {
-      const result = await userHook.changeUserPassword(
-        customer.id,
-        passwordFormData,
-      )
+      const result = await userHook.changeUserPassword(passwordFormData)
 
       if (result.success) {
         setPasswordFormData({

@@ -1,0 +1,47 @@
+services:
+  # Test database
+  postgres-test:
+    container_name: les_bookstore_postgres_test_container
+    image: postgres:15
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bookstore_test_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    tmpfs:
+      - /var/lib/postgresql/data # Use tmpfs for faster test performance
+
+  # Backend app for testing
+  app-test:
+    container_name: les_bookstore_backend_test_container
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.test
+    environment:
+      # Override DATABASE_HOST to use Docker service name
+      DATABASE_HOST: postgres-test
+      # Override DATABASE_PORT to use internal Docker port
+      DATABASE_PORT: 5432
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    command: yarn run start:dev
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/test/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+

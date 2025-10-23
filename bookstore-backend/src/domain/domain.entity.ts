@@ -32,6 +32,4 @@ export abstract class DomainEntity {
   public equals(other: DomainEntity): boolean {
     return this.id === other.id;
   }
-
-  public abstract update(props: any): void;
 }

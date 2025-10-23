@@ -10,9 +10,11 @@
     "preview": "vite preview",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "test:e2e": "yarn cy:run",
-    "test:e2e:open": "yarn cy:open",
-    "test:e2e:setup": "cd ../bookstore-backend && yarn test:e2e:setup"
+    "test:e2e": "npm run cy:run",
+    "test:e2e:open": "npm run cy:open",
+    "test:e2e:setup": "cd ../bookstore-backend && yarn test:e2e:setup",
+    "test:e2e:teardown": "cd ../bookstore-backend && yarn test:e2e:teardown",
+    "test:e2e:full": "npm run test:e2e:setup && npm run cy:open"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

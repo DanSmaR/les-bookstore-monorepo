@@ -2,6 +2,7 @@ import { House, Lock, PencilSimple, X } from 'phosphor-react'
 import React from 'react'
 
 import { Button } from '@/components'
+import { Container } from '@/pages/site/layout/styles'
 
 import {
   AddressForm,
@@ -82,108 +83,118 @@ export const ProfileEdit = () => {
 
   if (loading) {
     return (
-      <S.Container>
-        <S.LoadingContainer>
-          <S.LoadingText>Carregando perfil...</S.LoadingText>
-        </S.LoadingContainer>
-      </S.Container>
+      <Container>
+        <S.ContentContainer>
+          <S.LoadingContainer>
+            <S.LoadingText>Carregando perfil...</S.LoadingText>
+          </S.LoadingContainer>
+        </S.ContentContainer>
+      </Container>
     )
   }
 
   if (hasLoadError || (!customer && !loading)) {
     return (
-      <S.Container>
-        <S.ErrorContainer>
-          <S.ErrorText>Erro ao carregar perfil</S.ErrorText>
-          <Button onClick={loadProfile}>Tentar Novamente</Button>
-        </S.ErrorContainer>
-      </S.Container>
+      <Container>
+        <S.ContentContainer>
+          <S.ErrorContainer>
+            <S.ErrorText>Erro ao carregar perfil</S.ErrorText>
+            <Button onClick={loadProfile}>Tentar Novamente</Button>
+          </S.ErrorContainer>
+        </S.ContentContainer>
+      </Container>
     )
   }
 
   if (!customer) {
     return (
-      <S.Container>
-        <S.LoadingContainer>
-          <S.LoadingText>Carregando perfil...</S.LoadingText>
-        </S.LoadingContainer>
-      </S.Container>
+      <Container>
+        <S.ContentContainer>
+          <S.LoadingContainer>
+            <S.LoadingText>Carregando perfil...</S.LoadingText>
+          </S.LoadingContainer>
+        </S.ContentContainer>
+      </Container>
     )
   }
 
   return (
-    <S.Container>
-      <S.Header>
-        <div>
-          <S.Title>Meu Perfil</S.Title>
-          <S.Subtitle>
-            {isEditMode
-              ? 'Editando suas informações pessoais'
-              : 'Visualizando suas informações pessoais'}
-          </S.Subtitle>
-        </div>
-        <Button
-          variant={isEditMode ? 'ghost' : 'primary'}
-          size="sm"
-          onClick={handleEditToggle}
-        >
-          {isEditMode ? (
-            <>
-              <X size={16} /> Cancelar Edição
-            </>
-          ) : (
-            <>
-              <PencilSimple size={16} /> Editar Perfil
-            </>
-          )}
-        </Button>
-      </S.Header>
+    <Container>
+      <S.ContentContainer>
+        <S.Header>
+          <div>
+            <S.Title>Meu Perfil</S.Title>
+            <S.Subtitle>
+              {isEditMode
+                ? 'Editando suas informações pessoais'
+                : 'Visualizando suas informações pessoais'}
+            </S.Subtitle>
+          </div>
+          <Button
+            variant={isEditMode ? 'ghost' : 'primary'}
+            size="sm"
+            onClick={handleEditToggle}
+          >
+            {isEditMode ? (
+              <>
+                <X size={16} /> Cancelar Edição
+              </>
+            ) : (
+              <>
+                <PencilSimple size={16} /> Editar Perfil
+              </>
+            )}
+          </Button>
+        </S.Header>
 
-      {showPasswordForm ? (
-        <PasswordForm
-          onSave={handlePasswordChange}
-          onCancel={() => setShowPasswordForm(false)}
-          loading={saving}
-        />
-      ) : showAddressForm ? (
-        <AddressForm
-          address={editingAddress || undefined}
-          onSave={handleSaveAddress}
-          onCancel={() => {
-            setShowAddressForm(false)
-            cancelAddressEditing()
-          }}
-          loading={saving}
-        />
-      ) : (
-        <>
-          <ProfileEditForm
-            customer={customer}
-            onSave={saveProfile}
+        {showPasswordForm ? (
+          <PasswordForm
+            onSave={handlePasswordChange}
+            onCancel={() => setShowPasswordForm(false)}
             loading={saving}
             editMode={isEditMode}
           />
-
-          {isEditMode && (
-            <S.ActionsContainer>
-              <S.ActionButton onClick={() => setShowPasswordForm(true)}>
-                <Lock size={20} /> Alterar Senha
-              </S.ActionButton>
-              <S.ActionButton onClick={handleAddAddress}>
-                <House size={20} /> Adicionar Endereço
-              </S.ActionButton>
-            </S.ActionsContainer>
-          )}
-
-          <AddressList
-            addresses={customer.addresses || []}
-            onEdit={handleEditAddress}
-            onDelete={handleDeleteAddress}
+        ) : showAddressForm ? (
+          <AddressForm
+            address={editingAddress || undefined}
+            onSave={handleSaveAddress}
+            onCancel={() => {
+              setShowAddressForm(false)
+              cancelAddressEditing()
+            }}
             loading={saving}
             editMode={isEditMode}
           />
-        </>
-      )}
-    </S.Container>
+        ) : (
+          <>
+            <ProfileEditForm
+              customer={customer}
+              onSave={saveProfile}
+              loading={saving}
+              editMode={isEditMode}
+            />
+
+            {isEditMode && (
+              <S.ActionsContainer>
+                <S.ActionButton onClick={() => setShowPasswordForm(true)}>
+                  <Lock size={20} /> Alterar Senha
+                </S.ActionButton>
+                <S.ActionButton onClick={handleAddAddress}>
+                  <House size={20} /> Adicionar Endereço
+                </S.ActionButton>
+              </S.ActionsContainer>
+            )}
+
+            <AddressList
+              addresses={customer.addresses || []}
+              onEdit={handleEditAddress}
+              onDelete={handleDeleteAddress}
+              loading={saving}
+              editMode={isEditMode}
+            />
+          </>
+        )}
+      </S.ContentContainer>
+    </Container>
   )
 }

@@ -143,44 +143,41 @@ export const useUser = () => {
   /**
    * Update user
    */
-  const updateUser = useCallback(
-    async (id: string, userData: UpdateUserData) => {
-      setSingleUserState((prev) => ({ ...prev, isSaving: true }))
+  const updateUser = useCallback(async (userData: UpdateUserData) => {
+    setSingleUserState((prev) => ({ ...prev, isSaving: true }))
 
-      try {
-        const updatedUser = await UserService.updateUser(id, userData)
+    try {
+      const updatedUser = await UserService.updateUser(userData)
 
-        setSingleUserState((prev) => ({
-          ...prev,
-          user: updatedUser,
-          isSaving: false,
-        }))
+      setSingleUserState((prev) => ({
+        ...prev,
+        user: updatedUser,
+        isSaving: false,
+      }))
 
-        return { success: true, data: updatedUser }
-      } catch {
-        const errorMessage = 'Erro ao atualizar usuário'
+      return { success: true, data: updatedUser }
+    } catch {
+      const errorMessage = 'Erro ao atualizar usuário'
 
-        setSingleUserState((prev) => ({
-          ...prev,
-          isSaving: false,
-          error: errorMessage,
-        }))
+      setSingleUserState((prev) => ({
+        ...prev,
+        isSaving: false,
+        error: errorMessage,
+      }))
 
-        return { success: false, error: errorMessage }
-      }
-    },
-    [],
-  )
+      return { success: false, error: errorMessage }
+    }
+  }, [])
 
   /**
    * Change user password
    */
   const changeUserPassword = useCallback(
-    async (id: string, passwordData: PasswordChangeData) => {
+    async (passwordData: PasswordChangeData) => {
       setSingleUserState((prev) => ({ ...prev, isSaving: true }))
 
       try {
-        await UserService.changePassword(id, passwordData)
+        await UserService.changePassword(passwordData)
 
         setSingleUserState((prev) => ({ ...prev, isSaving: false }))
 
@@ -204,11 +201,11 @@ export const useUser = () => {
    * Create user address
    */
   const createUserAddress = useCallback(
-    async (userId: string, addressData: CreateAddressData) => {
+    async (addressData: CreateAddressData) => {
       setSingleUserState((prev) => ({ ...prev, isSaving: true }))
 
       try {
-        const newAddress = await UserService.createAddress(userId, addressData)
+        const newAddress = await UserService.createAddress(addressData)
 
         setSingleUserState((prev) => ({
           ...prev,
@@ -241,16 +238,11 @@ export const useUser = () => {
    * Update user address
    */
   const updateUserAddress = useCallback(
-    async (
-      userId: string,
-      addressId: string,
-      addressData: Partial<CreateAddressData>,
-    ) => {
+    async (addressId: string, addressData: Partial<CreateAddressData>) => {
       setSingleUserState((prev) => ({ ...prev, isSaving: true }))
 
       try {
         const updatedAddress = await UserService.updateAddress(
-          userId,
           addressId,
           addressData,
         )
@@ -287,41 +279,38 @@ export const useUser = () => {
   /**
    * Delete user address
    */
-  const deleteUserAddress = useCallback(
-    async (userId: string, addressId: string) => {
-      setSingleUserState((prev) => ({ ...prev, isSaving: true }))
+  const deleteUserAddress = useCallback(async (addressId: string) => {
+    setSingleUserState((prev) => ({ ...prev, isSaving: true }))
 
-      try {
-        await UserService.deleteAddress(userId, addressId)
+    try {
+      await UserService.deleteAddress(addressId)
 
-        setSingleUserState((prev) => ({
-          ...prev,
-          user: prev.user
-            ? {
-                ...prev.user,
-                addresses: prev.user.addresses.filter(
-                  (addr) => addr.id !== addressId,
-                ),
-              }
-            : null,
-          isSaving: false,
-        }))
+      setSingleUserState((prev) => ({
+        ...prev,
+        user: prev.user
+          ? {
+              ...prev.user,
+              addresses: prev.user.addresses.filter(
+                (addr) => addr.id !== addressId,
+              ),
+            }
+          : null,
+        isSaving: false,
+      }))
 
-        return { success: true }
-      } catch {
-        const errorMessage = 'Erro ao deletar endereço'
+      return { success: true }
+    } catch {
+      const errorMessage = 'Erro ao deletar endereço'
 
-        setSingleUserState((prev) => ({
-          ...prev,
-          isSaving: false,
-          error: errorMessage,
-        }))
+      setSingleUserState((prev) => ({
+        ...prev,
+        isSaving: false,
+        error: errorMessage,
+      }))
 
-        return { success: false, error: errorMessage }
-      }
-    },
-    [],
-  )
+      return { success: false, error: errorMessage }
+    }
+  }, [])
 
   /**
    * Inactivate user

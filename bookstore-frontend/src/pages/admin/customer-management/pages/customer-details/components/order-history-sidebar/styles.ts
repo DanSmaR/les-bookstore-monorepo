@@ -133,6 +133,22 @@ export const ItemCount = styled.span`
   color: ${(props) => props.theme.COLORS.NEUTRAL_600};
 `
 
+export const OrderItemsDetails = styled.div`
+  margin-top: ${(props) => props.theme.SPACING.SM};
+  padding-top: ${(props) => props.theme.SPACING.SM};
+  border-top: 1px solid ${(props) => props.theme.COLORS.NEUTRAL_200};
+`
+
+export const OrderItemText = styled.div`
+  font-size: ${(props) => props.theme.FONT_SIZE.XSMALL};
+  color: ${(props) => props.theme.COLORS.NEUTRAL_600};
+  margin-bottom: ${(props) => props.theme.SPACING.XS};
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`
+
 export const EmptyOrders = styled.div`
   display: flex;
   flex-direction: column;

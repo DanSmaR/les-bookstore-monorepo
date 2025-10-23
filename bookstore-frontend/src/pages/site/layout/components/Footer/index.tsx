@@ -44,11 +44,6 @@ export const Footer = () => {
           <S.Copyright>
             © 2024 BookStore. Todos os direitos reservados.
           </S.Copyright>
-          <S.PaymentMethods>
-            <S.PaymentIcon>VISA</S.PaymentIcon>
-            <S.PaymentIcon>MASTER</S.PaymentIcon>
-            <S.PaymentIcon>PIX</S.PaymentIcon>
-          </S.PaymentMethods>
         </S.FooterBottom>
       </S.Container>
     </S.FooterContainer>

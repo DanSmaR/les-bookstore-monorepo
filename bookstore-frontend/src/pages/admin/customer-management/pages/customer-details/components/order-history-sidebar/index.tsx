@@ -1,60 +1,15 @@
 import { Package, ShoppingBag } from 'phosphor-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components'
+import type { UserDTO } from '@/dtos/user/user'
 
 import * as S from './styles'
 
 interface OrderHistorySidebarProps {
-  customerId: string
+  customer: UserDTO | null
 }
 
-// Mock order data - will be replaced with real API call later
-const mockOrders = [
-  {
-    id: '001',
-    orderNumber: '#12345',
-    date: new Date('2024-12-10'),
-    value: 89.9,
-    status: 'Entregue',
-    items: 2,
-  },
-  {
-    id: '002',
-    orderNumber: '#12344',
-    date: new Date('2024-11-28'),
-    value: 156.45,
-    status: 'Entregue',
-    items: 3,
-  },
-  {
-    id: '003',
-    orderNumber: '#12343',
-    date: new Date('2024-11-15'),
-    value: 75.3,
-    status: 'Em Trânsito',
-    items: 1,
-  },
-  {
-    id: '004',
-    orderNumber: '#12342',
-    date: new Date('2024-10-22'),
-    value: 234.6,
-    status: 'Entregue',
-    items: 4,
-  },
-  {
-    id: '005',
-    orderNumber: '#12341',
-    date: new Date('2024-10-05'),
-    value: 45.9,
-    status: 'Cancelado',
-    items: 1,
-  },
-]
-
-export const OrderHistorySidebar = ({
-  customerId: _customerId,
-}: OrderHistorySidebarProps) => {
+export const OrderHistorySidebar = ({ customer }: OrderHistorySidebarProps) => {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -63,20 +18,21 @@ export const OrderHistorySidebar = ({
   }
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('pt-BR', {
+    return new Date(date).toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
     })
   }
 
-  const totalOrderValue = mockOrders
-    .filter((order) => order.status === 'Entregue')
-    .reduce((sum, order) => sum + order.value, 0)
+  const orders = customer?.orders || []
 
-  const completedOrders = mockOrders.filter(
-    (order) => order.status === 'Entregue',
-  ).length
+  const totalOrderValue = orders.reduce(
+    (sum, order) => sum + order.totalPrice,
+    0,
+  )
+
+  const completedOrders = orders.length // For now, assume all orders are completed
 
   return (
     <Card>
@@ -92,7 +48,7 @@ export const OrderHistorySidebar = ({
           <S.StatsGrid>
             <S.StatItem>
               <S.StatLabel>Total de Pedidos</S.StatLabel>
-              <S.StatValue>{mockOrders.length}</S.StatValue>
+              <S.StatValue>{orders.length}</S.StatValue>
             </S.StatItem>
 
             <S.StatItem>
@@ -111,23 +67,38 @@ export const OrderHistorySidebar = ({
         <S.OrderHistoryContainer>
           <S.SectionTitle>Pedidos Recentes</S.SectionTitle>
 
-          {mockOrders.length > 0 ? (
-            mockOrders.slice(0, 5).map((order) => (
-              <S.OrderCard key={order.id}>
+          {orders.length > 0 ? (
+            orders.slice(0, 5).map((order, index) => (
+              <S.OrderCard key={`order-${index}`}>
                 <S.OrderHeader>
-                  <S.OrderNumber>{order.orderNumber}</S.OrderNumber>
-                  <S.OrderDate>{formatDate(order.date)}</S.OrderDate>
+                  <S.OrderNumber>#{index + 1}</S.OrderNumber>
+                  <S.OrderDate>{formatDate(order.orderDate)}</S.OrderDate>
                 </S.OrderHeader>
 
                 <S.OrderDetails>
-                  <S.OrderValue>{formatCurrency(order.value)}</S.OrderValue>
-                  <S.OrderStatus status={order.status}>
-                    {order.status}
-                  </S.OrderStatus>
+                  <S.OrderValue>
+                    {formatCurrency(order.totalPrice)}
+                  </S.OrderValue>
+                  <S.OrderStatus status="Entregue">Entregue</S.OrderStatus>
                   <S.ItemCount>
-                    {order.items} {order.items === 1 ? 'item' : 'itens'}
+                    {order.totalItems}{' '}
+                    {order.totalItems === 1 ? 'item' : 'itens'}
                   </S.ItemCount>
                 </S.OrderDetails>
+
+                {/* Order Items Details */}
+                <S.OrderItemsDetails>
+                  {order.items.slice(0, 2).map((item, itemIndex) => (
+                    <S.OrderItemText key={`item-${itemIndex}`}>
+                      {item.book.title} (x{item.quantity})
+                    </S.OrderItemText>
+                  ))}
+                  {order.items.length > 2 && (
+                    <S.OrderItemText>
+                      + {order.items.length - 2} outros itens
+                    </S.OrderItemText>
+                  )}
+                </S.OrderItemsDetails>
               </S.OrderCard>
             ))
           ) : (

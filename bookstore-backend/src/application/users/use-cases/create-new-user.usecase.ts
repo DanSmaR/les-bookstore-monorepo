@@ -3,6 +3,7 @@ import { User } from '@domain/user/user.entity';
 import { Injectable } from '@nestjs/common';
 import { NewUserDTO } from '@presentation/auth/dtos/new-user.dto';
 import * as bcrypt from 'bcryptjs';
+import { Transactional } from 'typeorm-transactional';
 
 import { UsersService } from '../services';
 import { UserValidator } from '../validators/user.validator';
@@ -14,6 +15,7 @@ export class CreateNewUser {
     private readonly userValidator: UserValidator,
   ) {}
 
+  @Transactional()
   async execute(dto: NewUserDTO): Promise<User> {
     await this.userValidator.validate(dto);
 

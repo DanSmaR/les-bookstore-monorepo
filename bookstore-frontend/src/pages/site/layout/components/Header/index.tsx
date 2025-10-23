@@ -10,7 +10,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 
 import { Button } from '@/components'
-import { useAuth, useToast } from '@/providers'
+import { useAuth, useCart, useToast } from '@/providers'
 import { ROUTES } from '@/routes/constants'
 
 import * as S from './styles'
@@ -18,8 +18,8 @@ import * as S from './styles'
 export const Header = () => {
   // Auth state from provider
   const { isAuthenticated, signOut } = useAuth()
+  const { totalItems: cartItemsCount } = useCart()
   const toast = useToast()
-  const cartItemsCount = 0 // Mock cart count
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -86,11 +86,11 @@ export const Header = () => {
 
             {/* Cart */}
             <S.CartContainer>
-              <Link to={ROUTES.CART}>
+              <Link to={ROUTES.CART} data-testid="cart-icon">
                 <S.CartButton>
                   <ShoppingCart size={24} />
                   {cartItemsCount > 0 && (
-                    <S.CartBadge>
+                    <S.CartBadge data-testid="cart-badge">
                       {cartItemsCount > 99 ? '99+' : cartItemsCount}
                     </S.CartBadge>
                   )}
@@ -104,6 +104,7 @@ export const Header = () => {
                 <S.UserMenuButton
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   isOpen={isMenuOpen}
+                  data-testid="account-dropdown-button"
                 >
                   <S.UserAvatar>
                     <User size={16} />
@@ -123,14 +124,9 @@ export const Header = () => {
                     <S.DropdownItem
                       to={ROUTES.ORDERS}
                       onClick={() => setIsMenuOpen(false)}
+                      data-testid="orders-menu-link"
                     >
                       Meus Pedidos
-                    </S.DropdownItem>
-                    <S.DropdownItem
-                      to={ROUTES.ADDRESSES}
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Endereços
                     </S.DropdownItem>
                     <S.DropdownItem
                       to={ROUTES.PAYMENT_METHODS}

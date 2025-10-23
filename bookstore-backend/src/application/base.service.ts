@@ -1,4 +1,7 @@
 import { DomainEntity } from '@domain/domain.entity';
+import { Transactional } from 'typeorm-transactional';
+
+import { BaseRepository } from '@/application/base.repository';
 
 import { BaseRepository } from '@/application/base.repository';
 
@@ -11,6 +14,11 @@ export abstract class BaseService<E extends DomainEntity> {
 
   public async save(entity: E): Promise<E> {
     return this.commonRepository.save(entity);
+  }
+
+  @Transactional()
+  public async saveAll(entities: E[]): Promise<E[]> {
+    return this.commonRepository.saveAll(entities);
   }
 
   public async findById(id: string): Promise<E | null> {
@@ -50,12 +58,14 @@ export abstract class BaseService<E extends DomainEntity> {
     );
   }
 
+  @Transactional()
   public async inactivate(id: string): Promise<void> {
     const entity = await this.findByIdOrThrow(id);
     entity.inactivate();
     await this.save(entity);
   }
 
+  @Transactional()
   public async delete(id: string): Promise<void> {
     const entity = await this.findByIdOrThrow(id);
     await this.commonRepository.delete(entity);

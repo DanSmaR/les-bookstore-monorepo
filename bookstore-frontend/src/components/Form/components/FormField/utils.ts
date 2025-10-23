@@ -1,6 +1,10 @@
 import {
+  formatCardCVV,
+  formatCardExpiry,
   formatCPF,
+  formatCreditCard,
   formatDate,
+  formatISBN,
   formatPhone,
   formatZipCode,
 } from '@/utils/input-masks'
@@ -14,6 +18,10 @@ export const getFieldMask = (
     phone: formatPhone,
     date: formatDate,
     zipCode: formatZipCode,
+    isbn: formatISBN,
+    creditCard: formatCreditCard,
+    cardExpiry: formatCardExpiry,
+    cardCVV: formatCardCVV,
   }
 
   return maskMap[fieldType] || null

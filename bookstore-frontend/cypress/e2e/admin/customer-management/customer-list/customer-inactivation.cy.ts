@@ -2,6 +2,7 @@
 
 describe('Admin - User Inactivation', () => {
   let testUser: any
+  let adminUser: any
 
   before(() => {
     // Reset database before all tests to ensure clean state
@@ -16,32 +17,37 @@ describe('Admin - User Inactivation', () => {
       }
     })
 
-    // Create a real user for testing inactivation
-    cy.createRealUser().then((user) => {
-      testUser = user
-      cy.log('User created successfully for inactivation test:', testUser.id)
+    // Visit a page first so the React app is loaded
+    cy.visit('/')
+
+    // Create and login as admin user
+    cy.setupAuthenticatedAdmin().then((admin) => {
+      adminUser = admin
+      cy.log('Admin user created and authenticated:', adminUser.email)
     })
   })
 
   beforeEach(() => {
-    // Reset database before each test to ensure test isolation
-    cy.task('resetTestDatabase').then((result: any) => {
-      if (!result.success) {
-        cy.log(
-          '⚠️ Database reset failed before test, continuing:',
-          result.error,
-        )
-      }
-    })
+    // Don't reset database in beforeEach as it would delete our admin
+    // Admin authentication persists across tests - no need to re-authenticate
 
-    if (!testUser?.id) {
-      cy.log('Test user not available, skipping test')
+    if (!adminUser?.email) {
+      cy.log('Admin user not available, skipping test')
       return
     }
 
-    // Recreate test user for each test to ensure consistency
+    // Set up intercept before EACH test to ensure it's always active
+    // This must be done in beforeEach to persist across all tests
+    if (adminUser?.token?.accessToken) {
+      cy.intercept('http://localhost:3000/api/**', (req) => {
+        req.headers['Authorization'] = `Bearer ${adminUser.token.accessToken}`
+      }).as('apiRequest')
+    }
+
+    // Create a customer user for testing (WAIT for it to complete)
     cy.createRealUser().then((user) => {
       testUser = user
+      cy.log('✅ Customer user created for test:', testUser.email)
     })
 
     // Navigate to admin customers page
@@ -51,8 +57,8 @@ describe('Admin - User Inactivation', () => {
     cy.contains('Clientes').should('be.visible')
     cy.contains('Gerencie os clientes da sua livraria').should('be.visible')
 
-    // Wait for any initial loading to complete
-    cy.get('body').should('be.visible')
+    // Wait for customer card to appear (ensures data is loaded)
+    cy.get('[data-testid="customer-card"]', { timeout: 10000 }).should('exist')
   })
 
   after(() => {

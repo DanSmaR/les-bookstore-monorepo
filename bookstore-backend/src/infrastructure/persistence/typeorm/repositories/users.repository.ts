@@ -1,9 +1,10 @@
-import { UsersRepository } from '@application/users/users.repository';
 import { User } from '@domain/user/user.entity';
 import { CRUDRepository } from '@infrastructure/persistence/typeorm/repositories';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
+import { UsersRepository } from '@/application/users/interfaces/users.repository';
 
 @Injectable()
 export class UsersRepositoryImpl
