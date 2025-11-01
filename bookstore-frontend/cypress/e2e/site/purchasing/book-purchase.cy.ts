@@ -593,7 +593,7 @@ describe('Book Purchase Flow', () => {
       cy.window().then((window) => {
         window.localStorage.removeItem('cart-storage')
       })
-      
+
       // Create an order by adding book and checking out
       cy.visit('/catalog')
       cy.get('[data-testid="book-card"]', { timeout: 10000 })

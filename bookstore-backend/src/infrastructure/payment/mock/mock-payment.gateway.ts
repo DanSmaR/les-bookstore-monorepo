@@ -10,7 +10,7 @@ export class MockPaymentGateway implements PaymentGateway {
     request: PaymentIntentRequest,
   ): Promise<PaymentIntentResponse> {
     Logger.log(
-      `MockPaymentGateway: Creating payment for amount ${request.amountInCents} cents using card ${request.cardId}`,
+      `MockPaymentGateway: Creating payment for amount ${request.amount} using card ${request.cardId}`,
       'MockPaymentGateway',
     );
 

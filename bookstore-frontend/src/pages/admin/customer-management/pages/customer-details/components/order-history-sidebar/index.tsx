@@ -28,7 +28,7 @@ export const OrderHistorySidebar = ({ customer }: OrderHistorySidebarProps) => {
   const orders = customer?.orders || []
 
   const totalOrderValue = orders.reduce(
-    (sum, order) => sum + order.totalPrice,
+    (sum, order) => sum + ((order.subtotal || 0) - (order.discount || 0)),
     0,
   )
 
@@ -77,7 +77,9 @@ export const OrderHistorySidebar = ({ customer }: OrderHistorySidebarProps) => {
 
                 <S.OrderDetails>
                   <S.OrderValue>
-                    {formatCurrency(order.totalPrice)}
+                    {formatCurrency(
+                      (order.subtotal || 0) - (order.discount || 0),
+                    )}
                   </S.OrderValue>
                   <S.OrderStatus status="Entregue">Entregue</S.OrderStatus>
                   <S.ItemCount>

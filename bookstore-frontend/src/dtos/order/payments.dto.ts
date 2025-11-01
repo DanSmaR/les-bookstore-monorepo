@@ -1,6 +1,6 @@
 export interface PaymentDTO {
   cardId: string
-  amountInCents: number
+  amount: number
 }
 
 export interface PaymentsDTO {

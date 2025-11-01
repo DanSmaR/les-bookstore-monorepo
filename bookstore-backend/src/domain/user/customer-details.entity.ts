@@ -1,7 +1,15 @@
 import { DomainEntity } from '@domain/domain.entity';
-import { Entity, OneToMany, OneToOne } from 'typeorm';
+import {
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 
 import { Order } from '../order/order.entity';
+import { Ticket } from '../ticket/ticket.entity';
 import { Address } from './address.entity';
 import { Card } from './card.entity';
 import { User } from './user.entity';
@@ -9,6 +17,7 @@ import { User } from './user.entity';
 @Entity('tb_customer_details')
 export class CustomerDetails extends DomainEntity {
   @OneToOne(() => User, (user) => user.customerDetails)
+  @JoinColumn()
   user: User;
 
   @OneToMany(() => Address, (address) => address.customerDetails, {
@@ -28,6 +37,16 @@ export class CustomerDetails extends DomainEntity {
     eager: true,
   })
   _orders: Order[];
+
+  @ManyToMany(() => Ticket, { eager: true })
+  @JoinTable({
+    name: 'tb_used_tickets',
+    joinColumn: { name: 'customer_details_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'ticket_id', referencedColumnName: 'id' },
+  })
+  _usedTickets: Ticket[];
+
+  // Collection getters to ensure arrays are always initialized ============
 
   get addresses(): Address[] {
     if (!this._addresses) {
@@ -49,6 +68,15 @@ export class CustomerDetails extends DomainEntity {
     }
     return this._orders;
   }
+
+  get usedTickets(): Ticket[] {
+    if (!this._usedTickets) {
+      this._usedTickets = [];
+    }
+    return this._usedTickets;
+  }
+
+  // Business logic methods ================================================
 
   public hasAddress(address: Address): boolean;
   public hasAddress(addressId: string): boolean;
@@ -90,5 +118,25 @@ export class CustomerDetails extends DomainEntity {
 
       return current.orderDate > mostRecent.orderDate ? current : mostRecent;
     });
+  }
+
+  public hasUsedTicket(ticket: Ticket): boolean;
+  public hasUsedTicket(ticketId: string): boolean;
+
+  public hasUsedTicket(ticket: Ticket | string): boolean {
+    if (typeof ticket === 'string') {
+      return this.usedTickets.some((t) => t.id === ticket);
+    }
+    return this.usedTickets.some((t) => t.equals(ticket));
+  }
+
+  public addUsedTicket(ticket: Ticket): void {
+    if (!this.hasUsedTicket(ticket)) {
+      this._usedTickets.push(ticket);
+    }
+  }
+
+  public reinstateTicket(ticket: Ticket): void {
+    this._usedTickets = this.usedTickets.filter((t) => !t.equals(ticket));
   }
 }

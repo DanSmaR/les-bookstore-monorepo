@@ -50,6 +50,63 @@ export const OrderTotal = styled.span`
   font-weight: 600;
 `
 
+export const TicketsSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: ${({ theme }) => theme.COLORS.SUCCESS_LIGHTER};
+  border: 1px solid ${({ theme }) => theme.COLORS.SUCCESS_LIGHT};
+  border-radius: 8px;
+`
+
+export const TicketsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`
+
+export const TicketItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid ${({ theme }) => theme.COLORS.NEUTRAL_200};
+`
+
+export const TicketInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+`
+
+export const TicketHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`
+
+export const TicketCode = styled.span`
+  color: ${({ theme }) => theme.COLORS.NEUTRAL_900};
+  font-size: 14px;
+  font-weight: 600;
+  font-family: monospace;
+`
+
+export const TicketDescription = styled.span`
+  color: ${({ theme }) => theme.COLORS.NEUTRAL_600};
+  font-size: 12px;
+`
+
+export const TicketValue = styled.span`
+  color: ${({ theme }) => theme.COLORS.SUCCESS_MAIN};
+  font-size: 16px;
+  font-weight: 700;
+`
+
 export const CardsSection = styled.div`
   display: flex;
   flex-direction: column;
@@ -57,6 +114,9 @@ export const CardsSection = styled.div`
 `
 
 export const SectionTitle = styled.h3`
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: ${({ theme }) => theme.COLORS.NEUTRAL_900};
   font-size: 16px;
   font-weight: 600;
@@ -199,13 +259,17 @@ export const TotalLabel = styled.span`
   font-size: 14px;
 `
 
-export const TotalValue = styled.span<{ variant?: 'primary' | 'error' }>`
+export const TotalValue = styled.span<{
+  variant?: 'primary' | 'error' | 'success'
+}>`
   color: ${({ theme, variant }) => {
     switch (variant) {
       case 'error':
         return theme.COLORS.ERROR_MAIN
       case 'primary':
         return theme.COLORS.PRIMARY_MAIN
+      case 'success':
+        return theme.COLORS.SUCCESS_MAIN
       default:
         return theme.COLORS.NEUTRAL_900
     }

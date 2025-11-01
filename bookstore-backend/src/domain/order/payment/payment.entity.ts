@@ -1,5 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
+import { DecimalColumn } from '@/domain/decorators/decimal-column.decorator';
 import { DomainEntity } from '@/domain/domain.entity';
 import { Card } from '@/domain/user/card.entity';
 
@@ -9,8 +10,8 @@ import { PaymentStatus } from './enums/payment-status.enum';
 
 @Entity('tb_payments')
 export class Payment extends DomainEntity {
-  @Column()
-  amountInCents: number;
+  @DecimalColumn()
+  amount: number;
 
   @Column({ type: 'enum', enum: PaymentStatus })
   status: PaymentStatus = PaymentStatus.PENDING;
@@ -36,14 +37,14 @@ export class Payment extends DomainEntity {
   failureReason?: string;
 
   constructor(props: {
-    amountInCents: number;
+    amount: number;
     method: PaymentMethod;
     gatewayTransactionId: string;
     card?: Card;
   }) {
     super();
     if (props) {
-      this.amountInCents = props.amountInCents;
+      this.amount = props.amount;
       this.method = props.method;
       this.gatewayTransactionId = props.gatewayTransactionId;
       this.card = props.card;

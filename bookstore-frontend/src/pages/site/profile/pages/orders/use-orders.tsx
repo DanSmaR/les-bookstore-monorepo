@@ -30,10 +30,16 @@ export const useOrders = () => {
   const [hasInitialLoad, setHasInitialLoad] = useState(false)
   const [loading, setLoading] = useState(false)
   const [hasLoadError, setHasLoadError] = useState(false)
+  const [showCancelled, setShowCancelled] = useState(false)
 
   // Apply filters when orders or filters change
   useEffect(() => {
     let filtered = [...sortedOrders]
+
+    // Filter by cancelled status
+    if (!showCancelled) {
+      filtered = filtered.filter((order) => order.status !== 'cancelled')
+    }
 
     // Filter by date range
     if (filters.startDate && filters.endDate) {
@@ -54,7 +60,7 @@ export const useOrders = () => {
     }
 
     setFilteredOrders(filtered)
-  }, [sortedOrders, filters, filterOrdersByDateRange])
+  }, [sortedOrders, filters, filterOrdersByDateRange, showCancelled])
 
   // Load orders data
   const loadOrders = useCallback(async () => {
@@ -151,6 +157,8 @@ export const useOrders = () => {
     setFilters,
     handleFilterChange,
     clearFilters,
+    showCancelled,
+    setShowCancelled,
     formatCurrency,
     formatDate: formatDateTime,
     handleRefreshOrders,

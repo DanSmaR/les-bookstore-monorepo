@@ -19,6 +19,8 @@ export const Orders = () => {
     orderStatistics,
     isLoading,
     error,
+    showCancelled,
+    setShowCancelled,
     handleRefreshOrders,
     handleCancelOrder,
     formatCurrency,
@@ -52,7 +54,7 @@ export const Orders = () => {
     try {
       await payOrder(selectedOrder.id, payments)
       showSuccess('Seu pagamento foi processado com sucesso!')
-      handleRefreshOrders() // Refresh orders to get updated status
+      await handleRefreshOrders() // Wait for orders to refresh before closing modal
       handleClosePaymentModal()
     } catch {
       showError('Não foi possível processar o pagamento. Tente novamente.')
@@ -101,6 +103,22 @@ export const Orders = () => {
             Atualizar
           </Button>
         </S.Header>
+
+        <S.FilterSection>
+          <S.FilterRow>
+            <S.CheckboxContainer>
+              <S.Checkbox
+                type="checkbox"
+                id="show-cancelled"
+                checked={showCancelled}
+                onChange={(e) => setShowCancelled(e.target.checked)}
+              />
+              <S.CheckboxLabel htmlFor="show-cancelled">
+                Mostrar pedidos cancelados
+              </S.CheckboxLabel>
+            </S.CheckboxContainer>
+          </S.FilterRow>
+        </S.FilterSection>
 
         {totalOrders > 0 && (
           <S.OrdersStats>

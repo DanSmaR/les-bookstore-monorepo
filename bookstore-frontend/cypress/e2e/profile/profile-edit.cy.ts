@@ -56,7 +56,7 @@ describe('Profile Edit - With Authentication', () => {
 
     // Now navigate to the authenticated route
     cy.visit('/my-profile')
-    
+
     // Wait for profile page to load
     cy.contains('Meu Perfil', { timeout: 10000 }).should('be.visible')
   })
@@ -279,9 +279,11 @@ describe('Profile Edit - With Authentication', () => {
 
       // First, click "Editar Perfil" to enable edit mode
       cy.contains('button', 'Editar Perfil').should('be.visible').click()
-      
+
       // Wait for edit mode to be enabled
-      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should('be.visible')
+      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should(
+        'be.visible',
+      )
 
       // Now click the Edit button using the data-testid
       cy.get('[data-testid="profile-address-edit-button"]')
@@ -293,7 +295,9 @@ describe('Profile Edit - With Authentication', () => {
       cy.contains('Editar Endereço', { timeout: 10000 }).should('be.visible')
 
       // Verify modal content is loaded
-      cy.get('input[name="addressName"]', { timeout: 5000 }).should('be.visible')
+      cy.get('input[name="addressName"]', { timeout: 5000 }).should(
+        'be.visible',
+      )
       cy.get('select[aria-label="Tipo de Residência"]').should('be.visible')
 
       cy.log('✅ Address edit modal opened successfully')
@@ -310,9 +314,11 @@ describe('Profile Edit - With Authentication', () => {
 
       // First, click "Editar Perfil" to enable edit mode
       cy.contains('button', 'Editar Perfil').should('be.visible').click()
-      
+
       // Wait for edit mode to be enabled
-      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should('be.visible')
+      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should(
+        'be.visible',
+      )
 
       // Click edit button using data-testid
       cy.get('[data-testid="profile-address-edit-button"]').click()
@@ -362,9 +368,11 @@ describe('Profile Edit - With Authentication', () => {
 
       // First, click "Editar Perfil" to enable edit mode
       cy.contains('button', 'Editar Perfil').should('be.visible').click()
-      
+
       // Wait for edit mode to be enabled
-      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should('be.visible')
+      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should(
+        'be.visible',
+      )
 
       // Open address modal using data-testid
       cy.get('[data-testid="profile-address-edit-button"]').click()
@@ -395,9 +403,11 @@ describe('Profile Edit - With Authentication', () => {
 
       // First, click "Editar Perfil" to enable edit mode
       cy.contains('button', 'Editar Perfil').should('be.visible').click()
-      
+
       // Wait for edit mode to be enabled
-      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should('be.visible')
+      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should(
+        'be.visible',
+      )
 
       // Open address modal using data-testid
       cy.get('[data-testid="profile-address-edit-button"]').click()
@@ -421,9 +431,11 @@ describe('Profile Edit - With Authentication', () => {
 
       // First, click "Editar Perfil" to enable edit mode
       cy.contains('button', 'Editar Perfil').should('be.visible').click()
-      
+
       // Wait for edit mode to be enabled
-      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should('be.visible')
+      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should(
+        'be.visible',
+      )
 
       // Open address modal using data-testid
       cy.get('[data-testid="profile-address-edit-button"]').click()
@@ -447,9 +459,11 @@ describe('Profile Edit - With Authentication', () => {
 
       // First, click "Editar Perfil" to enable edit mode
       cy.contains('button', 'Editar Perfil').should('be.visible').click()
-      
+
       // Wait for edit mode to be enabled
-      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should('be.visible')
+      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should(
+        'be.visible',
+      )
 
       // Open address modal using data-testid
       cy.get('[data-testid="profile-address-edit-button"]').click()
@@ -503,9 +517,11 @@ describe('Profile Edit - With Authentication', () => {
 
       // First, click "Editar Perfil" to enable edit mode
       cy.contains('button', 'Editar Perfil').should('be.visible').click()
-      
+
       // Wait for edit mode to be enabled
-      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should('be.visible')
+      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should(
+        'be.visible',
+      )
 
       // Open address modal using data-testid
       cy.get('[data-testid="profile-address-edit-button"]').click()
@@ -535,9 +551,11 @@ describe('Profile Edit - With Authentication', () => {
 
       // First, click "Editar Perfil" to enable edit mode
       cy.contains('button', 'Editar Perfil').should('be.visible').click()
-      
+
       // Wait for edit mode to be enabled
-      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should('be.visible')
+      cy.contains('button', 'Cancelar Edição', { timeout: 5000 }).should(
+        'be.visible',
+      )
 
       // Open address modal using data-testid
       cy.get('[data-testid="profile-address-edit-button"]').click()
@@ -578,10 +596,12 @@ describe('Profile Edit - With Authentication', () => {
 
       // Check if address card is displayed
       cy.contains('Seus Endereços').should('be.visible')
-      
+
       // Check for address content
       cy.contains('apartment').should('be.visible')
-      cy.contains('Rua das Flores Atualizada, 456 - Apto 10').should('be.visible')
+      cy.contains('Rua das Flores Atualizada, 456 - Apto 10').should(
+        'be.visible',
+      )
 
       cy.log('✅ Address information displayed in card format')
     })

@@ -215,7 +215,7 @@ describe('Sign Up Form', () => {
       // Generate unique user data for each test to avoid conflicts
       const timestamp = Date.now()
       const validCPF = generateValidCPF()
-      
+
       validUserData = {
         name: 'João Silva Santos',
         email: `test.user.${timestamp}@example.com`,

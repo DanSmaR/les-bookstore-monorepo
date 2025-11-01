@@ -56,7 +56,7 @@ describe('Admin - Customer Details Page', () => {
     // Wait for page to load completely
     cy.contains('Clientes').should('be.visible')
     cy.contains('Gerencie os clientes da sua livraria').should('be.visible')
-    
+
     // Wait for customer card to appear (ensures data is loaded)
     cy.get('[data-testid="customer-card"]', { timeout: 10000 }).should('exist')
   })

@@ -16,14 +16,23 @@ export class UsersRepositoryImpl
   }
 
   public async findByEmail(email: string): Promise<User | null> {
-    return await this.repository.findOneBy({ email });
+    return await this.repository.findOne({
+      where: { email },
+      relations: ['customerDetails'],
+    });
   }
 
   public async findByCpf(cpf: string): Promise<User | null> {
-    return await this.repository.findOneBy({ cpf });
+    return await this.repository.findOne({
+      where: { cpf },
+      relations: ['customerDetails'],
+    });
   }
 
   public async findActiveById(id: string): Promise<User | null> {
-    return await this.repository.findOneBy({ id, active: true });
+    return await this.repository.findOne({
+      where: { id, active: true },
+      relations: ['customerDetails'],
+    });
   }
 }

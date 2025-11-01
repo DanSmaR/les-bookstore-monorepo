@@ -18,6 +18,13 @@ export class OrdersRepositoryImpl
     super(repository);
   }
 
+  public async findById(id: string): Promise<Order | null> {
+    return this.repository.findOne({
+      where: { id },
+      relations: ['customer.user', 'tickets'],
+    });
+  }
+
   public async findByUserAndStatus(
     customer: User,
     status?: OrderStatus,
@@ -25,11 +32,13 @@ export class OrdersRepositoryImpl
     const queryBuilder = this.repository
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.customer', 'customer')
+      .leftJoinAndSelect('customer.user', 'user')
       .leftJoinAndSelect('order.deliveryAddress', 'deliveryAddress')
       .leftJoinAndSelect('order._items', 'items')
       .leftJoinAndSelect('items.book', 'book')
       .leftJoinAndSelect('order._payments', 'payments')
       .leftJoinAndSelect('payments.card', 'card')
+      .leftJoinAndSelect('order.tickets', 'tickets')
       .where('customer.id = :customerId', {
         customerId: customer.customerDetails.id,
       });

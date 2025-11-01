@@ -1,6 +1,13 @@
 import type { ReactNode } from 'react'
 
-import type { BookDTO, CartItemDTO, CartStateDTO, CartSummaryDTO } from '@/dtos'
+import type {
+  ApplyTicketsResultDTO,
+  BookDTO,
+  CartItemDTO,
+  CartStateDTO,
+  CartSummaryDTO,
+  TicketDTO,
+} from '@/dtos'
 
 export interface CartContextValue {
   // State
@@ -8,6 +15,8 @@ export interface CartContextValue {
   summary: CartSummaryDTO
   isLoading: boolean
   lastUpdated: Date
+  selectedTickets: TicketDTO[]
+  appliedTicketsResult?: ApplyTicketsResultDTO
 
   // Computed properties
   isEmpty: boolean
@@ -22,6 +31,11 @@ export interface CartContextValue {
   clearCart: () => void
   getItem: (bookId: string) => CartItemDTO | undefined
   hasItem: (bookId: string) => boolean
+
+  // Ticket operations
+  selectTickets: (tickets: TicketDTO[]) => void
+  clearSelectedTickets: () => void
+  toggleTicketSelection: (ticket: TicketDTO) => void
 
   // Checkout operations
   checkout: (deliveryAddressId: string) => Promise<{

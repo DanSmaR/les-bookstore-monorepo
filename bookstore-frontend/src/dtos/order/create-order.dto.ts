@@ -6,4 +6,5 @@ export interface CreateOrderItemDTO {
 export interface CreateOrderDTO {
   items: CreateOrderItemDTO[]
   deliveryAddressId: string
+  ticketId: string | null
 }

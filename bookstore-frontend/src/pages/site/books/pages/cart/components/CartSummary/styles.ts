@@ -44,6 +44,12 @@ export const SummaryValue = styled.span`
   color: ${({ theme }) => theme.COLORS.NEUTRAL_800};
 `
 
+export const DiscountValue = styled.span`
+  font-size: ${({ theme }) => theme.FONT_SIZE.SMALL};
+  font-weight: ${({ theme }) => theme.FONT_WEIGHT.MEDIUM};
+  color: ${({ theme }) => theme.COLORS.SUCCESS_MAIN};
+`
+
 export const TotalRow = styled.div`
   display: flex;
   justify-content: space-between;

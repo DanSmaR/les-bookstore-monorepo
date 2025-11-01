@@ -2,9 +2,9 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
-  IsNotEmpty,
   IsNumber,
-  IsString,
+  IsOptional,
+  IsUUID,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -16,14 +16,16 @@ export class CreateNewOrderDTO {
   @Type(() => OrderItemDTO)
   items: OrderItemDTO[];
 
-  @IsString()
-  @IsNotEmpty()
+  @IsUUID()
   deliveryAddressId: string;
+
+  @IsUUID()
+  @IsOptional()
+  ticketId?: string;
 }
 
 export class OrderItemDTO {
-  @IsString()
-  @IsNotEmpty()
+  @IsUUID()
   bookId: string;
 
   @IsNumber()

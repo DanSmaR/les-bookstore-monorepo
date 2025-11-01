@@ -2,21 +2,6 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class SeedTestData1759794136149 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Insert customer details first (no dependencies)
-    await queryRunner.query(`
-      INSERT INTO tb_customer_details (
-        id,
-        active,
-        created_at,
-        updated_at
-      ) VALUES (
-        '550e8400-e29b-41d4-a716-446655440002',
-        true,
-        NOW(),
-        NOW()
-      )
-    `);
-
     // Insert test user - using consistent UUID (after customer details exists)
     await queryRunner.query(`
       INSERT INTO tb_users (
@@ -29,7 +14,6 @@ export class SeedTestData1759794136149 implements MigrationInterface {
         birth_date,
         password,
         role,
-        customer_details_id,
         active,
         created_at,
         updated_at
@@ -43,10 +27,26 @@ export class SeedTestData1759794136149 implements MigrationInterface {
         '2003-01-15',
         '$2a$12$0M9jTH82qibgZkVYL8NHU.48qm9fvGZ5IXKX0ZEUnorkoJ9h9kBWi', -- password: "Abc$%123"
         'user',
-        '550e8400-e29b-41d4-a716-446655440002',
         true,
         NOW(),
         NOW()
+      )
+    `);
+
+    // Insert customer details
+    await queryRunner.query(`
+      INSERT INTO tb_customer_details (
+        id,
+        active,
+        created_at,
+        updated_at,
+        user_id
+      ) VALUES (
+        '550e8400-e29b-41d4-a716-446655440002',
+        true,
+        NOW(),
+        NOW(),
+        '550e8400-e29b-41d4-a716-446655440001'
       )
     `);
 

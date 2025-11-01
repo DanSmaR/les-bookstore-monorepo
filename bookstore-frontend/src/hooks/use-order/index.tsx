@@ -50,9 +50,43 @@ export const useOrder = () => {
       }
     }
 
-    const totalSpent = orders.reduce((sum, order) => sum + order.totalPrice, 0)
-    const totalItems = orders.reduce((sum, order) => sum + order.totalItems, 0)
-    const averageOrderValue = totalSpent / orders.length
+    // Filter out pending and cancelled orders for statistics
+    const completedOrders = orders.filter(
+      (order) => order.status !== 'pending' && order.status !== 'cancelled',
+    )
+
+    if (!completedOrders.length) {
+      return {
+        totalSpent: 0,
+        averageOrderValue: 0,
+        totalItems: 0,
+      }
+    }
+
+    const totalSpent = completedOrders.reduce((sum, order) => {
+      // Calculate total price from subtotal - discount
+      const subtotal =
+        typeof order.subtotal === 'string'
+          ? parseFloat(order.subtotal)
+          : order.subtotal || 0
+      const discount =
+        typeof order.discount === 'string'
+          ? parseFloat(order.discount)
+          : order.discount || 0
+      const totalPrice = subtotal - discount
+
+      return sum + (isNaN(totalPrice) ? 0 : totalPrice)
+    }, 0)
+
+    const totalItems = completedOrders.reduce((sum, order) => {
+      const items =
+        typeof order.totalItems === 'string'
+          ? parseInt(order.totalItems)
+          : order.totalItems
+      return sum + (isNaN(items) ? 0 : items)
+    }, 0)
+
+    const averageOrderValue = totalSpent / completedOrders.length
 
     return {
       totalSpent,

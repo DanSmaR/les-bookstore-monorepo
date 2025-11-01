@@ -1,6 +1,6 @@
-import { CreditCard, Plus } from 'phosphor-react'
+import { CreditCard, Plus, Ticket } from 'phosphor-react'
 
-import { Button, Input, Modal } from '@/components'
+import { Badge, Button, Input, Modal } from '@/components'
 import type { OrderDTO, PaymentsDTO } from '@/dtos'
 import { formatCurrency } from '@/utils'
 
@@ -44,6 +44,8 @@ export const PaymentModal = ({
 
   if (!order) return null
 
+  const hasTickets = order.tickets && order.tickets.length > 0
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <S.ModalContent>
@@ -52,10 +54,54 @@ export const PaymentModal = ({
           <S.OrderInfo>
             <S.OrderDetails>
               <S.OrderId>Pedido #{order.id.slice(-8)}</S.OrderId>
-              <S.OrderTotal>{formatCurrency(order.totalPrice)}</S.OrderTotal>
+              <S.OrderTotal>
+                {formatCurrency((order.subtotal || 0) - (order.discount || 0))}
+              </S.OrderTotal>
             </S.OrderDetails>
           </S.OrderInfo>
         </S.Header>
+
+        {hasTickets && (
+          <S.TicketsSection>
+            <S.SectionTitle>
+              <Ticket size={20} />
+              Cupons Aplicados
+            </S.SectionTitle>
+            <S.TicketsList>
+              {order.tickets.map((ticket) => (
+                <S.TicketItem key={ticket.id}>
+                  <S.TicketInfo>
+                    <S.TicketHeader>
+                      <S.TicketCode>{ticket.code}</S.TicketCode>
+                      <Badge
+                        variant={
+                          ticket.nature === 'promotional'
+                            ? 'default'
+                            : 'success'
+                        }
+                        size="sm"
+                      >
+                        {ticket.nature === 'promotional'
+                          ? 'Promocional'
+                          : 'Troca'}
+                      </Badge>
+                    </S.TicketHeader>
+                    {ticket.description && (
+                      <S.TicketDescription>
+                        {ticket.description}
+                      </S.TicketDescription>
+                    )}
+                  </S.TicketInfo>
+                  <S.TicketValue>
+                    {ticket.type === 'percentage'
+                      ? `${ticket.value}%`
+                      : formatCurrency(ticket.value)}
+                  </S.TicketValue>
+                </S.TicketItem>
+              ))}
+            </S.TicketsList>
+          </S.TicketsSection>
+        )}
 
         <S.CardsSection>
           <S.SectionTitle>
@@ -132,16 +178,32 @@ export const PaymentModal = ({
 
         {selectedCards.length > 0 && (
           <S.TotalSection>
+            {order.discount > 0 && (
+              <>
+                <S.TotalRow>
+                  <S.TotalLabel>Subtotal:</S.TotalLabel>
+                  <S.TotalValue>{formatCurrency(order.subtotal)}</S.TotalValue>
+                </S.TotalRow>
+                <S.TotalRow>
+                  <S.TotalLabel>Desconto:</S.TotalLabel>
+                  <S.TotalValue variant="success">
+                    -{formatCurrency(order.discount)}
+                  </S.TotalValue>
+                </S.TotalRow>
+              </>
+            )}
             <S.TotalRow>
               <S.TotalLabel>Total do pedido:</S.TotalLabel>
-              <S.TotalValue>{formatCurrency(order.totalPrice)}</S.TotalValue>
+              <S.TotalValue>
+                {formatCurrency((order.subtotal || 0) - (order.discount || 0))}
+              </S.TotalValue>
             </S.TotalRow>
             <S.TotalRow>
               <S.TotalLabel>Total selecionado:</S.TotalLabel>
               <S.TotalValue
                 variant={remainingAmount === 0 ? 'primary' : 'error'}
               >
-                {formatCurrency(totalSelectedAmount / 100)}
+                {formatCurrency(totalSelectedAmount)}
               </S.TotalValue>
             </S.TotalRow>
             <S.TotalRow>
@@ -149,7 +211,7 @@ export const PaymentModal = ({
               <S.TotalValue
                 variant={remainingAmount === 0 ? 'primary' : 'error'}
               >
-                {formatCurrency(Math.abs(remainingAmount) / 100)}
+                {formatCurrency(Math.abs(remainingAmount))}
               </S.TotalValue>
             </S.TotalRow>
           </S.TotalSection>
@@ -164,7 +226,12 @@ export const PaymentModal = ({
         )}
 
         <S.Footer>
-          <Button variant="outline" onClick={onClose} disabled={isLoading} data-testid="payment-cancel-button">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={isLoading}
+            data-testid="payment-cancel-button"
+          >
             Cancelar
           </Button>
           <Button

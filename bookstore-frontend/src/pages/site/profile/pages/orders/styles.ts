@@ -157,3 +157,23 @@ export const ErrorContainer = styled.div`
     line-height: 1.5;
   }
 `
+
+export const CheckboxContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${defaultTheme.SPACING.SM};
+`
+
+export const Checkbox = styled.input`
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: ${defaultTheme.COLORS.PRIMARY_MAIN};
+`
+
+export const CheckboxLabel = styled.label`
+  font-size: ${defaultTheme.FONT_SIZE.MEDIUM};
+  color: ${defaultTheme.COLORS.NEUTRAL_700};
+  cursor: pointer;
+  user-select: none;
+`

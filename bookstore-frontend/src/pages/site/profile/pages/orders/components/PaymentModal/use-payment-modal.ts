@@ -5,7 +5,7 @@ import { useCard } from '@/hooks'
 import { useToast } from '@/providers'
 
 interface SelectedCard extends CardDTO {
-  amountInCents: number
+  amount: number
 }
 
 interface UsePaymentModalProps {
@@ -37,21 +37,23 @@ export const usePaymentModal = ({
 
   // Calculate total selected amount
   const totalSelectedAmount = selectedCards.reduce(
-    (sum, card) => sum + card.amountInCents,
+    (sum, card) => sum + card.amount,
     0,
   )
 
   // Calculate remaining amount
-  const remainingAmount = order
-    ? order.totalPrice * 100 - totalSelectedAmount
-    : 0
+  const orderTotal = order ? (order.subtotal || 0) - (order.discount || 0) : 0
+  const remainingAmount = order ? orderTotal - totalSelectedAmount : 0
 
-  // Check if payment is valid (amount matches order total and has at least one card)
+  // Check if payment is valid
+  // Case 1: Order fully covered by tickets (R$0.00) - no cards needed
+  // Case 2: Traditional payment - cards must match order total
   const isPaymentValid =
-    selectedCards.length > 0 &&
-    remainingAmount === 0 &&
-    selectedCards.length <= 2 &&
-    selectedCards.every((card) => card.amountInCents > 0)
+    orderTotal === 0 ||
+    (selectedCards.length > 0 &&
+      remainingAmount === 0 &&
+      selectedCards.length <= 2 &&
+      selectedCards.every((card) => card.amount > 0))
 
   const handleCardSelection = (card: CardDTO) => {
     setSelectedCards((prev) => {
@@ -68,11 +70,10 @@ export const usePaymentModal = ({
       } else {
         // Add card if not selected and less than 2 cards
         if (prev.length < 2) {
-          const defaultAmount =
-            prev.length === 0 ? (order?.totalPrice || 0) * 100 : remainingAmount
+          const defaultAmount = prev.length === 0 ? orderTotal : remainingAmount
 
           // Set initial formatted value in input
-          const formattedValue = (defaultAmount / 100).toLocaleString('pt-BR', {
+          const formattedValue = defaultAmount.toLocaleString('pt-BR', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })
@@ -81,7 +82,7 @@ export const usePaymentModal = ({
             [card.id]: formattedValue,
           }))
 
-          return [...prev, { ...card, amountInCents: defaultAmount }]
+          return [...prev, { ...card, amount: defaultAmount }]
         }
         return prev
       }
@@ -94,12 +95,10 @@ export const usePaymentModal = ({
 
     // Parse and store the actual amount for calculations
     const cleanValue = value.replace(/\./g, '').replace(',', '.')
-    const amountInCents = Math.round(parseFloat(cleanValue || '0') * 100)
+    const amount = parseFloat(cleanValue || '0')
 
     setSelectedCards((prev) =>
-      prev.map((card) =>
-        card.id === cardId ? { ...card, amountInCents } : card,
-      ),
+      prev.map((card) => (card.id === cardId ? { ...card, amount } : card)),
     )
   }
 
@@ -110,13 +109,10 @@ export const usePaymentModal = ({
   const handleInputBlur = (cardId: string) => {
     const selectedCard = selectedCards.find((card) => card.id === cardId)
     if (selectedCard) {
-      const formattedValue = (selectedCard.amountInCents / 100).toLocaleString(
-        'pt-BR',
-        {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        },
-      )
+      const formattedValue = selectedCard.amount.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
       setInputValues((prev) => ({ ...prev, [cardId]: formattedValue }))
     }
   }
@@ -125,11 +121,15 @@ export const usePaymentModal = ({
     if (!isPaymentValid || !order) return
 
     try {
+      // If order is fully covered by tickets (R$0.00), send empty payments array
       const payments: PaymentsDTO = {
-        payments: selectedCards.map((card) => ({
-          cardId: card.id,
-          amountInCents: card.amountInCents,
-        })),
+        payments:
+          orderTotal === 0
+            ? []
+            : selectedCards.map((card) => ({
+                cardId: card.id,
+                amount: card.amount,
+              })),
       }
 
       await onPayment(payments)

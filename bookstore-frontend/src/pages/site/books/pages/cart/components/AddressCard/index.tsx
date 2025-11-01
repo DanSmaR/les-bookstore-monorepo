@@ -28,7 +28,7 @@ export const AddressCard = ({
   }
 
   return (
-    <S.AddressCardContainer isSelected={isSelected} onClick={onClick} data-testid="address-card">
+    <S.AddressCardContainer isSelected={isSelected} onClick={onClick}>
       <S.AddressHeader>
         <S.AddressIcon>
           <MapPin size={20} weight={isSelected ? 'fill' : 'regular'} />

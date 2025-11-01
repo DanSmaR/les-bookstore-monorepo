@@ -1,5 +1,5 @@
 import { Gender } from '@domain/user/enums/gender.enum';
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, OneToOne } from 'typeorm';
 
 import { DomainEntity } from '../domain.entity';
 import { CustomerDetails } from './customer-details.entity';
@@ -29,8 +29,10 @@ export class User extends DomainEntity implements UserAuthDetails {
   @Column()
   password: string;
 
-  @OneToOne(() => CustomerDetails, { cascade: true, eager: true })
-  @JoinColumn()
+  @OneToOne(() => CustomerDetails, (customerDetails) => customerDetails.user, {
+    cascade: true,
+    eager: true,
+  })
   customerDetails: CustomerDetails;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })

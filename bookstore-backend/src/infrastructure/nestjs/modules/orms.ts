@@ -27,7 +27,7 @@ export const ORMS = {
             `${__dirname}/../../persistence/typeorm/migrations/*{.ts,.js}`,
           ],
           migrationsRun: nodeEnv === 'production',
-          dropSchema: isTest,
+          dropSchema: isTest, // Drop schema on each test run for clean state
           ssl:
             nodeEnv === 'production'
               ? {

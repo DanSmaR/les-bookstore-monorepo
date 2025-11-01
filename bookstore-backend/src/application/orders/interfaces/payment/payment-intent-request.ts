@@ -1,5 +1,5 @@
 export interface PaymentIntentRequest {
-  amountInCents: number;
+  amount: number;
   cardId: string;
   metadata?: Record<string, any>;
 }

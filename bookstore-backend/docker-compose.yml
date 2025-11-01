@@ -24,19 +24,6 @@ services:
       - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  # Test database for E2E tests
-  postgres-test:
-    container_name: les_bookstore_postgres_test_container
-    image: postgres:15
-    ports:
-      - "5433:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: bookstore_test_db
-    tmpfs:
-      - /var/lib/postgresql/data # Use tmpfs for faster test performance
-
+      
 volumes:
   postgres_data:

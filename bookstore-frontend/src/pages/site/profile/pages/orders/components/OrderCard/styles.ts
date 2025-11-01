@@ -36,6 +36,26 @@ export const OrderTotal = styled.div`
   color: ${defaultTheme.COLORS.PRIMARY_MAIN};
 `
 
+export const OrderTotalWithDiscount = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: ${defaultTheme.SPACING.SM};
+`
+
+export const OriginalPrice = styled.div`
+  font-size: ${defaultTheme.FONT_SIZE.SMALL};
+  text-decoration: line-through;
+  color: ${defaultTheme.COLORS.NEUTRAL_500};
+  opacity: 0.7;
+`
+
+export const DiscountedPrice = styled.div`
+  font-size: ${defaultTheme.FONT_SIZE.LARGE};
+  font-weight: ${defaultTheme.FONT_WEIGHT.BOLD};
+  color: ${defaultTheme.COLORS.SUCCESS_MAIN};
+`
+
 export const OrderContent = styled.div`
   padding: ${defaultTheme.SPACING.LG};
 `

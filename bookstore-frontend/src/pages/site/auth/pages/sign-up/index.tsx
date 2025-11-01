@@ -1,5 +1,4 @@
 import {
-  Alert,
   Button,
   Card,
   Form,
@@ -19,7 +18,7 @@ import * as S from './styles'
 import { useSignUp } from './use-sign-up'
 
 export const SignUp = () => {
-  const { form, onSubmit, isLoading, error } = useSignUp()
+  const { form, onSubmit, isLoading } = useSignUp()
 
   return (
     <S.Container>
@@ -27,13 +26,6 @@ export const SignUp = () => {
         <Header />
 
         <Card>
-          {/* Global error display */}
-          {error && (
-            <S.GlobalErrorAlert>
-              <Alert variant="error">{error}</Alert>
-            </S.GlobalErrorAlert>
-          )}
-
           <Form form={form} onSubmit={onSubmit}>
             {/* Personal Data Section */}
             <FormSection title="Dados Pessoais">

@@ -18,7 +18,7 @@ import { UserValidator } from '@application/users/validators/user.validator';
 import { Address } from '@domain/user/address.entity';
 import { CustomerDetails } from '@domain/user/customer-details.entity';
 import { User } from '@domain/user/user.entity';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersController } from '@presentation/admin/users/users.controller';
 import { UsersWebService } from '@presentation/admin/users/users.webservice';
@@ -31,6 +31,8 @@ import {
   CardsRepositoryImpl,
   UsersRepositoryImpl,
 } from '@/infrastructure/persistence/typeorm/repositories';
+
+import { OrdersModule } from './orders.module';
 
 const USE_CASES = [
   CreateNewUser,
@@ -45,7 +47,10 @@ const USE_CASES = [
 const VALIDATION_STRATEGIES = [EmailExistenceStrategy, CpfExistenceStrategy];
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, CustomerDetails, Address, Card])],
+  imports: [
+    TypeOrmModule.forFeature([User, CustomerDetails, Address, Card]),
+    forwardRef(() => OrdersModule),
+  ],
   controllers: [UsersController, UsersSiteController],
   providers: [
     ...VALIDATION_STRATEGIES,

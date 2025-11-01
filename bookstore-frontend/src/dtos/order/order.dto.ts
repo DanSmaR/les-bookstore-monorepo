@@ -1,3 +1,4 @@
+import type { TicketDTO } from '../ticket'
 import type { OrderBookDTO } from './order-book.dto'
 
 export interface OrderItemDTO {
@@ -11,7 +12,9 @@ export interface OrderDTO {
   id: string
   items: OrderItemDTO[]
   totalItems: number
-  totalPrice: number
+  subtotal: number
+  discount: number
   orderDate: Date
   status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled'
+  tickets: TicketDTO[]
 }

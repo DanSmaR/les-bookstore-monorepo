@@ -1,8 +1,9 @@
-import { Calendar, CreditCard, Package, X } from 'phosphor-react'
+import { Calendar, CreditCard, Package, Ticket, X } from 'phosphor-react'
 import { useState } from 'react'
 
 import { Badge, Button, Card, ConfirmationModal } from '@/components'
 import type { OrderDTO } from '@/dtos'
+import { calculateOrderTotal } from '@/utils'
 
 import * as S from './styles'
 
@@ -37,6 +38,9 @@ export const OrderCard = ({
 }: OrderCardProps) => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
+
+  // Calculate total price from subtotal - discount
+  const totalPrice = calculateOrderTotal(order)
 
   const statusInfo = getStatusBadge(order.status)
 
@@ -75,9 +79,24 @@ export const OrderCard = ({
               <Calendar size={16} />
               {formatDate(order.orderDate)}
             </S.OrderDate>
-            <S.OrderTotal>{formatCurrency(order.totalPrice)}</S.OrderTotal>
+            {order.discount > 0 ? (
+              <S.OrderTotalWithDiscount>
+                <S.OriginalPrice>
+                  {formatCurrency(order.subtotal)}
+                </S.OriginalPrice>
+                <S.DiscountedPrice>
+                  {formatCurrency(totalPrice)}
+                </S.DiscountedPrice>
+              </S.OrderTotalWithDiscount>
+            ) : (
+              <S.OrderTotal>{formatCurrency(totalPrice)}</S.OrderTotal>
+            )}
           </S.OrderInfo>
-          <Badge variant={statusInfo.variant} size="sm" data-testid="order-status-badge">
+          <Badge
+            variant={statusInfo.variant}
+            size="sm"
+            data-testid="order-status-badge"
+          >
             {statusInfo.label}
           </Badge>
         </S.OrderHeader>
@@ -90,6 +109,16 @@ export const OrderCard = ({
                 {order.totalItems} {order.totalItems === 1 ? 'item' : 'itens'}
               </span>
             </S.SummaryItem>
+            {order.discount > 0 && (
+              <S.SummaryItem>
+                <Ticket size={16} />
+                <span>
+                  {order.tickets && order.tickets.length > 0
+                    ? `${order.tickets.length} cupom${order.tickets.length > 1 ? 's' : ''} aplicado${order.tickets.length > 1 ? 's' : ''}`
+                    : `Desconto: ${formatCurrency(order.discount)}`}
+                </span>
+              </S.SummaryItem>
+            )}
           </S.OrderSummary>
 
           <S.OrderItems>
@@ -118,7 +147,12 @@ export const OrderCard = ({
         {(canCancel || canPay) && (
           <S.OrderFooter>
             {canPay && (
-              <Button variant="primary" size="sm" onClick={handlePayClick} data-testid="order-pay-button">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handlePayClick}
+                data-testid="order-pay-button"
+              >
                 <CreditCard size={14} />
                 Pagar
               </Button>

@@ -71,7 +71,11 @@ export const AddressSelectionModal = ({
         </S.AddressesSection>
 
         <S.Footer>
-          <Button variant="outline" onClick={handleClose} data-testid="address-cancel-button">
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            data-testid="address-cancel-button"
+          >
             Cancelar
           </Button>
           <Button
