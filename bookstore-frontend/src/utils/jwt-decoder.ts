@@ -41,6 +41,8 @@ export const isTokenExpired = (token: string): boolean => {
   const payload = decodeJwtPayload(token)
   if (!payload) return true
 
+  if (!payload.exp) return false
+
   const currentTime = Math.floor(Date.now() / 1000)
   return payload.exp < currentTime
 }

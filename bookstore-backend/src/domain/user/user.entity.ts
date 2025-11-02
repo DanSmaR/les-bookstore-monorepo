@@ -91,4 +91,8 @@ export class User extends DomainEntity implements UserAuthDetails {
   public getRole(): UserRole {
     return this.role;
   }
+
+  public isAdmin(): boolean {
+    return this.role === UserRole.ADMIN;
+  }
 }

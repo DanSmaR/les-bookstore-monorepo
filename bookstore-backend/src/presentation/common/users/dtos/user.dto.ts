@@ -1,7 +1,6 @@
 import { Gender } from '@domain/user/enums/gender.enum';
 import { User } from '@domain/user/user.entity';
 
-import { OrderDTO } from '../../books/dtos/order.dto';
 import { AddressDTO } from './address.dto';
 
 export class UserDTO {
@@ -13,7 +12,6 @@ export class UserDTO {
   gender: Gender;
   birthDate: Date;
   addresses: AddressDTO[];
-  orders: OrderDTO[];
   createdAt: Date;
   updatedAt: Date;
   active: boolean;
@@ -28,9 +26,6 @@ export class UserDTO {
     this.birthDate = user.birthDate;
     this.addresses = user.customerDetails.addresses.map(
       (address) => new AddressDTO(address),
-    );
-    this.orders = user.customerDetails.orders.map(
-      (order) => new OrderDTO(order),
     );
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;

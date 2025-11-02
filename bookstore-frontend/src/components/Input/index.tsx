@@ -4,7 +4,7 @@ import * as S from './styles'
 
 export type InputProps = {
   children?: React.ReactNode
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'search'
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'search' | 'date'
   customSize?: 'sm' | 'md' | 'lg'
   variant?: 'default' | 'filled' | 'outline'
   disabled?: boolean

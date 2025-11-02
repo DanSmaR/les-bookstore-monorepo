@@ -137,6 +137,8 @@ export const useCartPage = (): UseCartPageReturn => {
               )
             }
           } catch (error) {
+            console.error('Erro ao aplicar cupons:', error)
+
             // If ticket application fails, warn user but don't block order
             showInfo(
               'Pedido criado, mas houve erro ao aplicar cupons. Você pode aplicá-los manualmente na página de pedidos.',
@@ -149,6 +151,7 @@ export const useCartPage = (): UseCartPageReturn => {
         showSuccess(`Pedido ${result.orderId} criado com sucesso!`)
         navigate('/orders')
       } catch (error) {
+        console.error('Erro ao finalizar pedido:', error)
         showError('Erro inesperado ao finalizar pedido. Tente novamente.')
       } finally {
         setIsCheckingOut(false)

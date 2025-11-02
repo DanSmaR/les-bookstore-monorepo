@@ -1,15 +1,15 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import type { OrderDTO } from '@/dtos'
-import { OrderService } from '@/services'
-
-import { useUser } from '../use-user'
+import type { OrderDTO, OrderStatusType } from '@/dtos'
+import { OrderService, UserService } from '@/services'
 
 interface OrderState {
   orders: OrderDTO[]
   isLoading: boolean
   error: string | null
   totalOrders: number
+  currentPage: number
+  pageSize: number
 }
 
 interface OrderStatistics {
@@ -21,26 +21,64 @@ interface OrderStatistics {
 /**
  * Order Hook
  * Manages order state and provides order-related functions
- * Works with user data since orders come along with user information
+ * Fetches orders from /me/orders endpoint
  */
 export const useOrder = () => {
-  const { user, isUserLoading, userError, getCurrentUser } = useUser()
+  const [orderState, setOrderState] = useState<OrderState>({
+    orders: [],
+    isLoading: false,
+    error: null,
+    totalOrders: 0,
+    currentPage: 1,
+    pageSize: 10,
+  })
 
-  const orderState: OrderState = useMemo(
-    () => ({
-      orders: user?.orders || [],
-      isLoading: isUserLoading,
-      error: userError,
-      totalOrders: user?.orders?.length || 0,
-    }),
-    [user?.orders, isUserLoading, userError],
-  )
+  /**
+   * Fetch user orders from API
+   */
+  const fetchOrders = useCallback(async (page = 1, pageSize = 10) => {
+    setOrderState((prev) => ({ ...prev, isLoading: true, error: null }))
+
+    try {
+      const response = await UserService.getUserOrders({ page, pageSize })
+
+      setOrderState({
+        orders: response.items,
+        isLoading: false,
+        error: null,
+        totalOrders: response.totalCount,
+        currentPage: page,
+        pageSize,
+      })
+
+      return { success: true, data: response }
+    } catch {
+      const errorMessage = 'Erro ao carregar pedidos'
+
+      setOrderState((prev) => ({
+        ...prev,
+        orders: [],
+        isLoading: false,
+        error: errorMessage,
+        totalOrders: 0,
+      }))
+
+      return { success: false, error: errorMessage }
+    }
+  }, [])
+
+  /**
+   * Load orders on mount
+   */
+  useEffect(() => {
+    fetchOrders()
+  }, [fetchOrders])
 
   /**
    * Calculate order statistics
    */
   const orderStatistics: OrderStatistics = useMemo(() => {
-    const orders = orderState.orders
+    const orders = Array.isArray(orderState.orders) ? orderState.orders : []
 
     if (!orders.length) {
       return {
@@ -99,10 +137,13 @@ export const useOrder = () => {
    * Get orders sorted by date (newest first)
    */
   const getSortedOrders = useMemo(() => {
-    return [...orderState.orders].sort(
-      (a, b) =>
-        new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime(),
-    )
+    const orders = Array.isArray(orderState.orders) ? orderState.orders : []
+    return orders
+      .slice()
+      .sort(
+        (a, b) =>
+          new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime(),
+      )
   }, [orderState.orders])
 
   /**
@@ -110,7 +151,8 @@ export const useOrder = () => {
    */
   const filterOrdersByDateRange = useCallback(
     (startDate: Date, endDate: Date) => {
-      return orderState.orders.filter((order) => {
+      const orders = Array.isArray(orderState.orders) ? orderState.orders : []
+      return orders.filter((order) => {
         const orderDate = new Date(order.orderDate)
         return orderDate >= startDate && orderDate <= endDate
       })
@@ -125,16 +167,15 @@ export const useOrder = () => {
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-    return orderState.orders.filter(
-      (order) => new Date(order.orderDate) >= thirtyDaysAgo,
-    )
+    const orders = Array.isArray(orderState.orders) ? orderState.orders : []
+    return orders.filter((order) => new Date(order.orderDate) >= thirtyDaysAgo)
   }, [orderState.orders])
 
   /**
    * Refresh orders data
    */
   const refreshOrders = async () => {
-    return await getCurrentUser()
+    return await fetchOrders()
   }
 
   /**
@@ -144,15 +185,49 @@ export const useOrder = () => {
     async (orderId: string) => {
       try {
         await OrderService.cancelOrder(orderId)
-        // Refresh user data to get updated orders
-        await getCurrentUser()
+        // Refresh orders data to get updated orders
+        await fetchOrders()
         return { success: true }
       } catch (error) {
         return { success: false, error }
       }
     },
-    [getCurrentUser],
+    [fetchOrders],
   )
+
+  /**
+   * Change order status
+   */
+  const changeOrderStatus = useCallback(
+    async (orderId: string, status: OrderStatusType) => {
+      try {
+        await OrderService.changeOrderStatus(orderId, { status })
+        // Refresh orders data to get updated orders
+        await fetchOrders()
+        return { success: true }
+      } catch (error) {
+        return { success: false, error }
+      }
+    },
+    [fetchOrders],
+  )
+
+  // Pagination helper methods
+  const goToPage = useCallback(
+    (page: number) => {
+      fetchOrders(page, orderState.pageSize)
+    },
+    [fetchOrders, orderState.pageSize],
+  )
+
+  const changePageSize = useCallback(
+    (pageSize: number) => {
+      fetchOrders(1, pageSize) // Reset to first page when changing page size
+    },
+    [fetchOrders],
+  )
+
+  const totalPages = Math.ceil(orderState.totalOrders / orderState.pageSize)
 
   return {
     // State
@@ -160,6 +235,11 @@ export const useOrder = () => {
     isLoading: orderState.isLoading,
     error: orderState.error,
     totalOrders: orderState.totalOrders,
+
+    // Pagination state
+    currentPage: orderState.currentPage,
+    pageSize: orderState.pageSize,
+    totalPages,
 
     // Computed data
     orderStatistics,
@@ -169,6 +249,11 @@ export const useOrder = () => {
     // Actions
     refreshOrders,
     cancelOrder,
+    changeOrderStatus,
     filterOrdersByDateRange,
+
+    // Pagination actions
+    goToPage,
+    changePageSize,
   }
 }

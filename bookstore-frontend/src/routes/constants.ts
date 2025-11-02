@@ -46,6 +46,7 @@ export const ROUTES = {
 // Route patterns for React Router (with parameters) - reuse base routes
 export const ROUTE_PATTERNS = {
   ADMIN_CUSTOMER_VIEW: `${ADMIN_ROUTES.CUSTOMERS}/:id`,
+  ADMIN_CUSTOMER_ORDERS: `${ADMIN_ROUTES.CUSTOMERS}/:id/orders`,
   ADMIN_BOOK_EDIT: `${ADMIN_ROUTES.BOOKS}/:id/${PATHS.EDIT}`,
   ADMIN_BOOK_VIEW: `${ADMIN_ROUTES.BOOKS}/:id`,
   PROFILE_EDIT_USER: '/profile/edit/:id', // Para editar usuário específico
@@ -55,6 +56,8 @@ export const ROUTE_PATTERNS = {
 export const createRoute = {
   adminCustomerView: (id: string) =>
     ROUTE_PATTERNS.ADMIN_CUSTOMER_VIEW.replace(':id', id),
+  adminCustomerOrders: (id: string) =>
+    ROUTE_PATTERNS.ADMIN_CUSTOMER_ORDERS.replace(':id', id),
   adminBookEdit: (id: string) =>
     ROUTE_PATTERNS.ADMIN_BOOK_EDIT.replace(':id', id),
   adminBookView: (id: string) =>

@@ -1,8 +1,16 @@
 import { Calendar, CreditCard, Package, Ticket, X } from 'phosphor-react'
 import { useState } from 'react'
 
-import { Badge, Button, Card, ConfirmationModal } from '@/components'
-import type { OrderDTO } from '@/dtos'
+import {
+  Badge,
+  Button,
+  Card,
+  ConfirmationModal,
+  OrderStatusChanger,
+  USER_STATUS_CHANGES,
+} from '@/components'
+import type { OrderDTO, OrderStatusType } from '@/dtos'
+import { useOrderStatus } from '@/hooks'
 import { calculateOrderTotal } from '@/utils'
 
 import * as S from './styles'
@@ -13,6 +21,7 @@ interface OrderCardProps {
   formatDate: (date: Date) => string
   onCancelOrder: (orderId: string) => Promise<{ success: boolean }>
   onPayOrder?: (orderId: string) => void
+  onOrderUpdate?: () => void
 }
 
 const getStatusBadge = (status: OrderDTO['status']) => {
@@ -35,9 +44,19 @@ export const OrderCard = ({
   formatDate,
   onCancelOrder,
   onPayOrder,
+  onOrderUpdate,
 }: OrderCardProps) => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
+  const { changeOrderStatus, isLoading } = useOrderStatus()
+
+  const handleStatusChange = async (
+    orderId: string,
+    newStatus: OrderStatusType,
+  ) => {
+    await changeOrderStatus(orderId, newStatus)
+    onOrderUpdate?.()
+  }
 
   // Calculate total price from subtotal - discount
   const totalPrice = calculateOrderTotal(order)
@@ -142,6 +161,13 @@ export const OrderCard = ({
               </S.MoreItems>
             )}
           </S.OrderItems>
+
+          <OrderStatusChanger
+            order={order}
+            availableChanges={USER_STATUS_CHANGES}
+            onStatusChange={handleStatusChange}
+            isLoading={isLoading}
+          />
         </S.OrderContent>
 
         {(canCancel || canPay) && (

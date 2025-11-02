@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
 
-import type { UserDTO } from '@/dtos/user/user'
-import { useUser } from '@/hooks'
+import type { CustomerDTO } from '@/dtos/user/customer.dto'
+import { useCustomer } from '@/hooks'
 import { useToast } from '@/providers/toast/use-toast'
 
 interface UseCustomerDetailsReturn {
-  customer: UserDTO | null
+  customer: CustomerDTO | null
   isLoading: boolean
   error: string | null
 }
@@ -13,7 +13,13 @@ interface UseCustomerDetailsReturn {
 export const useCustomerDetails = (
   customerId: string,
 ): UseCustomerDetailsReturn => {
-  const { user, isUserLoading, userError, getUserById, clearError } = useUser()
+  const {
+    customer,
+    isCustomerLoading,
+    customerError,
+    getCustomerById,
+    clearError,
+  } = useCustomer()
   const { addToast } = useToast()
 
   useEffect(() => {
@@ -25,7 +31,7 @@ export const useCustomerDetails = (
 
       try {
         clearError()
-        const result = await getUserById(customerId)
+        const result = await getCustomerById(customerId)
 
         if (!result.success && result.error) {
           addToast(result.error, 'error')
@@ -41,11 +47,11 @@ export const useCustomerDetails = (
     }
 
     loadCustomerDetails()
-  }, [customerId, getUserById, addToast, clearError])
+  }, [customerId, getCustomerById, addToast, clearError])
 
   return {
-    customer: user,
-    isLoading: isUserLoading,
-    error: userError,
+    customer,
+    isLoading: isCustomerLoading,
+    error: customerError,
   }
 }

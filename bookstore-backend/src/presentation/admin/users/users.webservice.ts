@@ -1,20 +1,27 @@
 import { UsersService } from '@application/users/services';
 import { Injectable } from '@nestjs/common';
-import { UserDTO } from '@presentation/common/users/dtos';
 
+import { OrdersService } from '@/application/orders/services/orders.service';
 import { UserRole } from '@/domain/user/enums/role.enum';
+import { BaseUsersWebService } from '@/presentation/common/users/base-users.webservice';
 import { PaginatedResultDTO } from '@/presentation/dtos/paginated-result.dto';
 import { PaginationParamsDTO } from '@/presentation/dtos/pagination-params.dto';
 
 import { MinUserDTO } from './dtos';
+import { CustomerDTO } from './dtos/customer.dto';
 
 @Injectable()
-export class UsersWebService {
-  constructor(private readonly usersService: UsersService) {}
+export class UsersWebService extends BaseUsersWebService {
+  constructor(
+    private readonly usersService: UsersService,
+    ordersService: OrdersService,
+  ) {
+    super(ordersService);
+  }
 
-  public async findById(id: string): Promise<UserDTO> {
+  public async findById(id: string): Promise<CustomerDTO> {
     const user = await this.usersService.findByIdOrThrow(id);
-    return new UserDTO(user);
+    return new CustomerDTO(user);
   }
 
   public async findAll(

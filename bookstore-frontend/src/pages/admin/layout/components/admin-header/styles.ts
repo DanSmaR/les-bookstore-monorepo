@@ -13,11 +13,11 @@ export const HeaderContent = styled.div`
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
+`
 
-  nav {
-    display: flex;
-    gap: 16px;
-  }
+export const Navigation = styled.nav`
+  display: flex;
+  gap: 16px;
 
   a {
     display: flex;
@@ -40,6 +40,11 @@ export const HeaderContent = styled.div`
       transition: ${(props) => props.theme.TRANSITIONS.SLOW};
     }
   }
+`
+
+export const RightSection = styled.div`
+  display: flex;
+  align-items: center;
 `
 
 export const Title = styled.h1`

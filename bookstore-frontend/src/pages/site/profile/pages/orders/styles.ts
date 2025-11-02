@@ -177,3 +177,18 @@ export const CheckboxLabel = styled.label`
   cursor: pointer;
   user-select: none;
 `
+
+export const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: ${defaultTheme.SPACING.LG};
+  margin-top: ${defaultTheme.SPACING.XL};
+  padding: ${defaultTheme.SPACING.LG};
+`
+
+export const PageInfo = styled.span`
+  font-size: ${defaultTheme.FONT_SIZE.MEDIUM};
+  color: ${defaultTheme.COLORS.NEUTRAL_700};
+  font-weight: ${defaultTheme.FONT_WEIGHT.MEDIUM};
+`

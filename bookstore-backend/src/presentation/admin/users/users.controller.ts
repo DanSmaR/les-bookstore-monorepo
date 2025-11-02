@@ -6,7 +6,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { UserDTO } from '@presentation/common/users/dtos';
 
 import { UserRole } from '@/domain/user/enums/role.enum';
 import { Roles } from '@/infrastructure/auth/decorators/roles.decorator';
@@ -14,6 +13,7 @@ import { JwtAuthGuard, RolesGuard } from '@/infrastructure/auth/guards';
 import { PaginatedResultDTO } from '@/presentation/dtos/paginated-result.dto';
 import { PaginationParamsDTO } from '@/presentation/dtos/pagination-params.dto';
 
+import { CustomerDTO } from './dtos/customer.dto';
 import { MinUserDTO } from './dtos/min-user.dto';
 import { UsersWebService } from './users.webservice';
 
@@ -32,12 +32,21 @@ export class UsersController {
   }
 
   @Get(':id')
-  public async findById(@Param('id') id: string): Promise<UserDTO> {
+  public async findById(@Param('id') id: string): Promise<CustomerDTO> {
     return await this.usersWebService.findById(id);
   }
 
   @Delete(':id')
   public async delete(@Param('id') id: string): Promise<void> {
     await this.usersWebService.inactivate(id);
+  }
+
+  @Get(':id/orders')
+  public async getOrders(
+    @Param('id') id: string,
+    @Query() query: PaginationParamsDTO,
+    @Query() filters: Record<string, any> = {},
+  ) {
+    return this.usersWebService.getOrders(id, query, filters);
   }
 }

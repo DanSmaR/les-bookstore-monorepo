@@ -2,6 +2,7 @@ import { ProtectedRoute } from '@/components'
 import {
   AdminLayout,
   CustomerDetails,
+  CustomerOrders,
   CustomersList,
   ErrorPage,
   ProfileEdit,
@@ -25,6 +26,10 @@ export const adminRoutes = [
   {
     path: `${PATHS.CUSTOMERS}/:id`, // 'customers/:id' - customer details
     element: <CustomerDetails />,
+  },
+  {
+    path: `${PATHS.CUSTOMERS}/:id/orders`, // 'customers/:id/orders' - customer orders
+    element: <CustomerOrders />,
   },
   {
     path: `${PATHS.CUSTOMERS}/${PATHS.NEW}`, // 'customers/new' - composed from segments

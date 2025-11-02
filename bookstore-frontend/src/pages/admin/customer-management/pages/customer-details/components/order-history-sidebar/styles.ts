@@ -1,78 +1,69 @@
 import styled from 'styled-components'
 
-export const StatsSection = styled.div`
-  margin-bottom: ${(props) => props.theme.SPACING.LG};
-`
-
-export const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: ${(props) => props.theme.SPACING.MD};
-`
-
-export const StatItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${(props) => props.theme.SPACING.XS};
-`
-
-export const StatLabel = styled.span`
-  font-size: ${(props) => props.theme.FONT_SIZE.SMALL};
-  color: ${(props) => props.theme.COLORS.NEUTRAL_600};
-  font-weight: ${(props) => props.theme.FONT_WEIGHT.MEDIUM};
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-`
-
-export const StatValue = styled.span`
-  font-size: ${(props) => props.theme.FONT_SIZE.MEDIUM};
-  color: ${(props) => props.theme.COLORS.NEUTRAL_800};
-  font-weight: ${(props) => props.theme.FONT_WEIGHT.MEDIUM};
-`
-
-export const OrderHistoryContainer = styled.div`
+export const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${(props) => props.theme.SPACING.MD};
 `
 
-export const SectionTitle = styled.h4`
-  margin: 0;
-  font-size: ${(props) => props.theme.FONT_SIZE.MEDIUM};
-  font-weight: ${(props) => props.theme.FONT_WEIGHT.BOLD};
-  color: ${(props) => props.theme.COLORS.NEUTRAL_800};
+export const OrdersList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${(props) => props.theme.SPACING.SM};
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: ${(props) => props.theme.SPACING.XS};
+
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: ${(props) => props.theme.COLORS.NEUTRAL_100};
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${(props) => props.theme.COLORS.NEUTRAL_300};
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: ${(props) => props.theme.COLORS.NEUTRAL_400};
+  }
 `
 
-export const OrderCard = styled.div`
-  padding: ${(props) => props.theme.SPACING.MD};
+export const OrderItem = styled.div`
   border: 1px solid ${(props) => props.theme.COLORS.NEUTRAL_200};
-  border-radius: ${(props) => props.theme.BORDER_RADIUS.MD};
-  background-color: ${(props) => props.theme.COLORS.NEUTRAL_50};
+  border-radius: ${(props) => props.theme.BORDER_RADIUS.SM};
+  padding: ${(props) => props.theme.SPACING.MD};
+  background: ${(props) => props.theme.COLORS.NEUTRAL_50};
   transition: all ${(props) => props.theme.TRANSITIONS.FAST};
 
   &:hover {
-    border-color: ${(props) => props.theme.COLORS.PRIMARY_LIGHT};
-    box-shadow: 0 2px 4px ${(props) => props.theme.COLORS.NEUTRAL_200}40;
+    border-color: ${(props) => props.theme.COLORS.NEUTRAL_300};
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 `
 
 export const OrderHeader = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: ${(props) => props.theme.SPACING.SM};
+  align-items: center;
+  margin-bottom: ${(props) => props.theme.SPACING.XS};
 `
 
-export const OrderNumber = styled.h6`
-  margin: 0;
+export const OrderId = styled.span`
   font-size: ${(props) => props.theme.FONT_SIZE.SMALL};
-  font-weight: ${(props) => props.theme.FONT_WEIGHT.BOLD};
-  color: ${(props) => props.theme.COLORS.NEUTRAL_800};
+  font-weight: ${(props) => props.theme.FONT_WEIGHT.MEDIUM};
+  color: ${(props) => props.theme.COLORS.NEUTRAL_700};
 `
 
-export const OrderDate = styled.span`
+export const OrderDate = styled.div`
   font-size: ${(props) => props.theme.FONT_SIZE.XSMALL};
-  color: ${(props) => props.theme.COLORS.NEUTRAL_600};
+  color: ${(props) => props.theme.COLORS.NEUTRAL_500};
+  margin-bottom: ${(props) => props.theme.SPACING.SM};
 `
 
 export const OrderDetails = styled.div`
@@ -81,85 +72,63 @@ export const OrderDetails = styled.div`
   gap: ${(props) => props.theme.SPACING.XS};
 `
 
-export const OrderValue = styled.span`
-  font-size: ${(props) => props.theme.FONT_SIZE.MEDIUM};
-  font-weight: ${(props) => props.theme.FONT_WEIGHT.BOLD};
-  color: ${(props) => props.theme.COLORS.PRIMARY_MAIN};
+export const ItemsCount = styled.div`
+  font-size: ${(props) => props.theme.FONT_SIZE.XSMALL};
+  color: ${(props) => props.theme.COLORS.NEUTRAL_600};
 `
 
-export const OrderStatus = styled.span<{ status: string }>`
-  padding: ${(props) => props.theme.SPACING.XS}
-    ${(props) => props.theme.SPACING.SM};
-  border-radius: ${(props) => props.theme.BORDER_RADIUS.SM};
+export const PriceInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`
+
+export const Subtotal = styled.div`
   font-size: ${(props) => props.theme.FONT_SIZE.XSMALL};
+  color: ${(props) => props.theme.COLORS.NEUTRAL_600};
+`
+
+export const Discount = styled.div`
+  font-size: ${(props) => props.theme.FONT_SIZE.XSMALL};
+  color: ${(props) => props.theme.COLORS.SUCCESS_MAIN};
   font-weight: ${(props) => props.theme.FONT_WEIGHT.MEDIUM};
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  width: fit-content;
-
-  ${(props) => {
-    switch (props.status) {
-      case 'Entregue':
-        return `
-          background-color: ${props.theme.COLORS.SUCCESS_LIGHTER};
-          color: ${props.theme.COLORS.SUCCESS_DARK};
-        `
-      case 'Em Trânsito':
-        return `
-          background-color: ${props.theme.COLORS.WARNING_LIGHTER};
-          color: ${props.theme.COLORS.WARNING_DARK};
-        `
-      case 'Preparando':
-        return `
-          background-color: ${props.theme.COLORS.SECONDARY_LIGHTER};
-          color: ${props.theme.COLORS.SECONDARY_DARK};
-        `
-      case 'Cancelado':
-        return `
-          background-color: ${props.theme.COLORS.ERROR_LIGHTER};
-          color: ${props.theme.COLORS.ERROR_DARK};
-        `
-      default:
-        return `
-          background-color: ${props.theme.COLORS.NEUTRAL_200};
-          color: ${props.theme.COLORS.NEUTRAL_700};
-        `
-    }
-  }}
 `
 
-export const ItemCount = styled.span`
+interface TotalProps {
+  hasDiscount?: boolean
+}
+
+export const Total = styled.div<TotalProps>`
   font-size: ${(props) => props.theme.FONT_SIZE.SMALL};
-  color: ${(props) => props.theme.COLORS.NEUTRAL_600};
+  font-weight: ${(props) => props.theme.FONT_WEIGHT.BOLD};
+  color: ${(props) =>
+    props.hasDiscount
+      ? props.theme.COLORS.SUCCESS_MAIN
+      : props.theme.COLORS.NEUTRAL_700};
+  margin-top: 2px;
 `
 
-export const OrderItemsDetails = styled.div`
-  margin-top: ${(props) => props.theme.SPACING.SM};
-  padding-top: ${(props) => props.theme.SPACING.SM};
-  border-top: 1px solid ${(props) => props.theme.COLORS.NEUTRAL_200};
-`
-
-export const OrderItemText = styled.div`
-  font-size: ${(props) => props.theme.FONT_SIZE.XSMALL};
-  color: ${(props) => props.theme.COLORS.NEUTRAL_600};
-  margin-bottom: ${(props) => props.theme.SPACING.XS};
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-`
-
-export const EmptyOrders = styled.div`
+export const EmptyState = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: ${(props) => props.theme.SPACING.XL};
-  text-align: center;
+  padding: ${(props) => props.theme.SPACING.XXL};
   color: ${(props) => props.theme.COLORS.NEUTRAL_500};
+  text-align: center;
+
+  svg {
+    margin-bottom: ${(props) => props.theme.SPACING.MD};
+    opacity: 0.5;
+  }
 
   p {
-    margin: 0;
     font-size: ${(props) => props.theme.FONT_SIZE.SMALL};
+    margin: 0;
   }
+`
+
+export const ShowAllButton = styled.div`
+  padding-top: ${(props) => props.theme.SPACING.SM};
+  border-top: 1px solid ${(props) => props.theme.COLORS.NEUTRAL_200};
 `

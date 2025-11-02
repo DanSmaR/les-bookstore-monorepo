@@ -10,7 +10,9 @@ import {
 import { Injectable } from '@nestjs/common';
 import { AddressDTO, UserDTO } from '@presentation/common/users/dtos';
 
+import { OrdersService } from '@/application/orders/services/orders.service';
 import { RemoveUserCard } from '@/application/users/use-cases/cards/remove-user-card.usecase';
+import { BaseUsersWebService } from '@/presentation/common/users/base-users.webservice';
 import { CardDTO } from '@/presentation/common/users/dtos/card.dto';
 
 import {
@@ -22,7 +24,7 @@ import {
 } from './dtos';
 
 @Injectable()
-export class UsersSiteWebService {
+export class UsersSiteWebService extends BaseUsersWebService {
   constructor(
     private readonly usersService: UsersService,
     private readonly changeUserPassword: ChangeUserPassword,
@@ -32,7 +34,10 @@ export class UsersSiteWebService {
     private readonly removeUserAddress: RemoveUserAddress,
     private readonly addUserCard: AddUserCard,
     private readonly removeUserCard: RemoveUserCard,
-  ) {}
+    ordersService: OrdersService,
+  ) {
+    super(ordersService);
+  }
 
   public async getProfile(userId: string): Promise<UserDTO> {
     const user = await this.usersService.findByIdOrThrow(userId);

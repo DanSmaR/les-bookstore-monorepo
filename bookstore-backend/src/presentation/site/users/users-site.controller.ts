@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -15,7 +16,10 @@ import { AddressDTO, UserDTO } from '@presentation/common/users/dtos';
 import { UserRole } from '@/domain/user/enums/role.enum';
 import { Roles } from '@/infrastructure/auth/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from '@/infrastructure/auth/guards';
+import { OrderDTO } from '@/presentation/common/books/dtos/order.dto';
 import { CardDTO } from '@/presentation/common/users/dtos/card.dto';
+import { PaginatedResultDTO } from '@/presentation/dtos/paginated-result.dto';
+import { PaginationParamsDTO } from '@/presentation/dtos/pagination-params.dto';
 
 import { CreateCardDTO } from './dtos';
 import { ChangePasswordDTO } from './dtos/change-password.dto';
@@ -118,5 +122,15 @@ export class UsersSiteController {
     @Param('cardId') cardId: string,
   ): Promise<void> {
     await this.usersWebService.removeCard(req.user.userId, cardId);
+  }
+
+  @Get('orders')
+  public async getOrders(
+    @Request() req: AuthenticatedRequest,
+    @Query() query: PaginationParamsDTO,
+    @Query() filters: Record<string, any> = {},
+  ): Promise<PaginatedResultDTO<OrderDTO>> {
+    const userId = req.user.userId;
+    return this.usersWebService.getOrders(userId, query, filters);
   }
 }

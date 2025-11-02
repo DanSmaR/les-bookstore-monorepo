@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router'
 
 import { useAuth } from '@/providers'
 import { useToast } from '@/providers/toast/use-toast'
-import { ROUTES } from '@/routes/advanced'
+import { ROUTES } from '@/routes/constants'
 import { type SignInFormData, signInSchema } from '@/schemas/auth-schemas'
 
 export const useSignIn = () => {
@@ -25,11 +25,13 @@ export const useSignIn = () => {
 
     const result = await signIn(data)
 
-    if (result.success) {
-      navigate(ROUTES.HOME)
-    } else {
+    if (!result.success) {
       showError(result.error || 'Erro ao fazer login')
+      return
     }
+
+    // Always redirect to home page regardless of role
+    navigate(ROUTES.HOME)
   }
 
   return {

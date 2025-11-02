@@ -26,7 +26,7 @@ export class CreateNewOrder {
   public async execute(dto: CreateNewOrderDTO, userId: string): Promise<Order> {
     const user = await this.usersService.findActiveByIdOrThrow(userId);
 
-    await this.validate(dto, user);
+    this.validate(dto, user);
     const deliveryAddress = user.customerDetails.getAddress(
       dto.deliveryAddressId,
     );
@@ -60,7 +60,7 @@ export class CreateNewOrder {
     return await this.service.save(order);
   }
 
-  private async validate(dto: CreateNewOrderDTO, user: User): Promise<void> {
+  private validate(dto: CreateNewOrderDTO, user: User) {
     if (!user.customerDetails.hasAddress(dto.deliveryAddressId)) {
       throw new BadRequestException(
         `User does not have an address with ID ${dto.deliveryAddressId}.`,

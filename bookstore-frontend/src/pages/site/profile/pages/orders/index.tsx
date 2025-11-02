@@ -25,6 +25,10 @@ export const Orders = () => {
     handleCancelOrder,
     formatCurrency,
     formatDate,
+    // Pagination
+    currentPage,
+    totalPages,
+    goToPage,
   } = useOrders()
 
   const { getCards } = useCard()
@@ -157,18 +161,48 @@ export const Orders = () => {
             </NavigationButton>
           </S.EmptyState>
         ) : (
-          <S.OrdersList>
-            {orders.map((order) => (
-              <OrderCard
-                key={order.id}
-                order={order}
-                formatCurrency={formatCurrency}
-                formatDate={formatDate}
-                onCancelOrder={handleCancelOrder}
-                onPayOrder={handlePayOrder}
-              />
-            ))}
-          </S.OrdersList>
+          <>
+            <S.OrdersList>
+              {orders.map((order) => (
+                <OrderCard
+                  key={order.id}
+                  order={order}
+                  formatCurrency={formatCurrency}
+                  formatDate={formatDate}
+                  onCancelOrder={handleCancelOrder}
+                  onPayOrder={handlePayOrder}
+                  onOrderUpdate={handleRefreshOrders}
+                />
+              ))}
+            </S.OrdersList>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <S.PaginationContainer>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => goToPage(currentPage - 1)}
+                >
+                  Anterior
+                </Button>
+
+                <S.PageInfo>
+                  Página {currentPage} de {totalPages}
+                </S.PageInfo>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === totalPages}
+                  onClick={() => goToPage(currentPage + 1)}
+                >
+                  Próxima
+                </Button>
+              </S.PaginationContainer>
+            )}
+          </>
         )}
 
         <PaymentModal

@@ -1,12 +1,12 @@
 import { User } from 'phosphor-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components'
-import type { UserDTO } from '@/dtos/user/user'
+import type { CustomerDTO } from '@/dtos/user/customer.dto'
 
 import * as S from './styles'
 
 interface CustomerPersonalInfoProps {
-  customer: UserDTO
+  customer: CustomerDTO
 }
 
 export const CustomerPersonalInfo = ({

@@ -1,31 +1,29 @@
 import {
   Body,
   Controller,
-  Get,
   Param,
   Patch,
   Post,
-  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
 
-import { OrderStatus } from '@/domain/order/status.enum';
 import { UserRole } from '@/domain/user/enums/role.enum';
 import { Roles } from '@/infrastructure/auth/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from '@/infrastructure/auth/guards';
 import { AuthenticatedRequest } from '@/presentation/auth/interfaces';
 import { OrderDTO } from '@/presentation/common/books/dtos/order.dto';
 
+import { ChangeOrderStatusDTO } from './dtos/change-order-status.dto';
 import { CreateNewOrderDTO } from './dtos/create-new-order.dto';
 import { PaymentsDTO } from './dtos/payments.dto';
-import { OrdersWebService } from './orders.webservice';
+import { OrdersSiteWebService } from './orders-site.webservice';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.USER)
 @Controller('orders')
-export class OrdersController {
-  constructor(private readonly webService: OrdersWebService) {}
+export class OrdersSiteController {
+  constructor(private readonly webService: OrdersSiteWebService) {}
 
   @Post()
   public async createOrder(
@@ -36,15 +34,6 @@ export class OrdersController {
     return await this.webService.createOrder(dto, userId);
   }
 
-  @Get()
-  public async getOrders(
-    @Request() req: AuthenticatedRequest,
-    @Query('status') status?: OrderStatus,
-  ): Promise<OrderDTO[]> {
-    const userId = req.user.userId;
-    return this.webService.findByUserAndStatus(userId, status);
-  }
-
   @Post(':id/pay')
   public async payOrder(
     @Param('id') orderId: string,
@@ -53,12 +42,14 @@ export class OrdersController {
     return await this.webService.pay(orderId, dto);
   }
 
-  @Patch(':id/cancel')
-  public async cancelOrder(
+  @Roles(UserRole.ADMIN, UserRole.USER)
+  @Patch(':id')
+  public async changeOrderStatus(
     @Param('id') orderId: string,
+    @Body() dto: ChangeOrderStatusDTO,
     @Request() req: AuthenticatedRequest,
   ): Promise<OrderDTO> {
     const userId = req.user.userId;
-    return this.webService.cancel(orderId, userId);
+    return this.webService.changeStatus(orderId, userId, dto.status);
   }
 }

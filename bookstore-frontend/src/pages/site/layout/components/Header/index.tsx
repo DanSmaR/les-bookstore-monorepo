@@ -1,39 +1,20 @@
-import {
-  BookOpen,
-  CaretDown,
-  List,
-  MagnifyingGlass,
-  ShoppingCart,
-  User,
-} from 'phosphor-react'
+import { BookOpen, List, MagnifyingGlass, ShoppingCart } from 'phosphor-react'
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 
-import { Button } from '@/components'
-import { useAuth, useCart, useToast } from '@/providers'
+import { Button, ProfileMenu } from '@/components'
+import { useAuth, useCart } from '@/providers'
 import { ROUTES } from '@/routes/constants'
 
 import * as S from './styles'
 
 export const Header = () => {
   // Auth state from provider
-  const { isAuthenticated, signOut } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { totalItems: cartItemsCount } = useCart()
-  const toast = useToast()
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-
-  const handleLogout = async () => {
-    try {
-      await signOut()
-      toast.showSuccess('Sign out efetuado com sucesso.')
-      navigate(ROUTES.SIGNIN)
-      setIsMenuOpen(false)
-    } catch {
-      toast.showError('Erro ao desconectar. Tente novamente.')
-    }
-  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -100,47 +81,7 @@ export const Header = () => {
 
             {/* User menu */}
             {isAuthenticated ? (
-              <S.UserMenuContainer>
-                <S.UserMenuButton
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  isOpen={isMenuOpen}
-                  data-testid="account-dropdown-button"
-                >
-                  <S.UserAvatar>
-                    <User size={16} />
-                  </S.UserAvatar>
-                  <S.UserName>Minha Conta</S.UserName>
-                  <CaretDown size={16} className="dropdown-caret" />
-                </S.UserMenuButton>
-
-                {isMenuOpen && (
-                  <S.UserDropdown>
-                    <S.DropdownItem
-                      to={ROUTES.MY_PROFILE}
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Meu Perfil
-                    </S.DropdownItem>
-                    <S.DropdownItem
-                      to={ROUTES.ORDERS}
-                      onClick={() => setIsMenuOpen(false)}
-                      data-testid="orders-menu-link"
-                    >
-                      Meus Pedidos
-                    </S.DropdownItem>
-                    <S.DropdownItem
-                      to={ROUTES.PAYMENT_METHODS}
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Cartões
-                    </S.DropdownItem>
-                    <S.DropdownDivider />
-                    <S.DropdownButton onClick={handleLogout}>
-                      Sair
-                    </S.DropdownButton>
-                  </S.UserDropdown>
-                )}
-              </S.UserMenuContainer>
+              <ProfileMenu />
             ) : (
               <S.AuthButtons>
                 <Link to={ROUTES.SIGNIN}>

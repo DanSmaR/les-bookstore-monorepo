@@ -33,6 +33,37 @@ export class SeedTestData1759794136149 implements MigrationInterface {
       )
     `);
 
+    // Insert admin user - no customer details needed
+    await queryRunner.query(`
+      INSERT INTO tb_users (
+        id,
+        name,
+        email,
+        cpf,
+        phone,
+        gender,
+        birth_date,
+        password,
+        role,
+        active,
+        created_at,
+        updated_at
+      ) VALUES (
+        '550e8400-e29b-41d4-a716-446655440008',
+        'Admin User',
+        'admin@bookstore.com',
+        '98765432100',
+        '11999888777',
+        'other',
+        '1990-01-01',
+        '$2a$12$0M9jTH82qibgZkVYL8NHU.48qm9fvGZ5IXKX0ZEUnorkoJ9h9kBWi', -- password: "Abc$%123"
+        'admin',
+        true,
+        NOW(),
+        NOW()
+      )
+    `);
+
     // Insert customer details
     await queryRunner.query(`
       INSERT INTO tb_customer_details (
@@ -247,7 +278,7 @@ export class SeedTestData1759794136149 implements MigrationInterface {
       `DELETE FROM tb_books WHERE id IN ('550e8400-e29b-41d4-a716-446655440004', '550e8400-e29b-41d4-a716-446655440005')`,
     );
     await queryRunner.query(
-      `DELETE FROM tb_users WHERE id = '550e8400-e29b-41d4-a716-446655440001'`,
+      `DELETE FROM tb_users WHERE id IN ('550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440008')`,
     );
     await queryRunner.query(
       `DELETE FROM tb_customer_details WHERE id = '550e8400-e29b-41d4-a716-446655440002'`,

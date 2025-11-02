@@ -1,6 +1,7 @@
 import { Book, Books, House, Users } from 'phosphor-react'
 import { NavLink } from 'react-router'
 
+import { ProfileMenu } from '@/components'
 import { ROUTES } from '@/routes/constants'
 
 import * as S from './styles'
@@ -13,7 +14,7 @@ export const AdminHeader = () => {
           <Book size={32} />
           Bookstore Admin
         </S.Title>
-        <nav>
+        <S.Navigation>
           <NavLink to={ROUTES.HOME}>
             <House size={24} />
             <span>Home</span>
@@ -26,7 +27,10 @@ export const AdminHeader = () => {
             <Books size={24} />
             <span>Livros</span>
           </NavLink>
-        </nav>
+        </S.Navigation>
+        <S.RightSection>
+          <ProfileMenu />
+        </S.RightSection>
       </S.HeaderContent>
     </S.HeaderContainer>
   )

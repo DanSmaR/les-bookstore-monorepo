@@ -1,9 +1,9 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { BaseService } from '@/application/base.service';
+import { PaginatedResult } from '@/application/paginated-result';
 import { UsersService } from '@/application/users/services';
 import { Order } from '@/domain/order/order.entity';
-import { OrderStatus } from '@/domain/order/status.enum';
 
 import { OrdersRepository } from '../interfaces/orders.repository';
 
@@ -17,9 +17,17 @@ export class OrdersService extends BaseService<Order> {
     super(repository);
   }
 
-  public async findByUserAndStatus(userId: string, status?: OrderStatus) {
+  public async findByUser(
+    userId: string,
+    page: number,
+    limit: number,
+    filters: Record<string, any> = {},
+    sortField?: string,
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+  ): Promise<PaginatedResult<Order>> {
     const user = await this.usersService.findActiveCustomerByIdOrThrow(userId);
-    return await this.repository.findByUserAndStatus(user, status);
+    filters['customer'] = { id: user.customerDetails.id };
+    return await this.findAll(page, limit, filters, sortField, sortOrder);
   }
 
   async findByIdAndUserOrThrow(

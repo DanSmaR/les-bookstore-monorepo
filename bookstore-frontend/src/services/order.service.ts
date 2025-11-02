@@ -1,4 +1,10 @@
-import type { CreateOrderDTO, OrderDTO, PaymentsDTO } from '@/dtos'
+import type {
+  ChangeOrderStatusDTO,
+  CreateOrderDTO,
+  OrderDTO,
+  PaymentsDTO,
+} from '@/dtos'
+import { OrderStatus } from '@/dtos'
 
 import { AxiosApp } from './axios-app'
 
@@ -17,12 +23,27 @@ export class OrderService {
   }
 
   /**
+   * Change order status
+   * @param orderId - The ID of the order to update
+   * @param statusData - The status change data
+   */
+  static async changeOrderStatus(
+    orderId: string,
+    statusData: ChangeOrderStatusDTO,
+  ): Promise<OrderDTO> {
+    const response = await AxiosApp.patch<OrderDTO>(
+      `/orders/${orderId}`,
+      statusData,
+    )
+    return response.data
+  }
+
+  /**
    * Cancel an order
    * @param orderId - The ID of the order to cancel
    */
   static async cancelOrder(orderId: string): Promise<OrderDTO> {
-    const response = await AxiosApp.patch<OrderDTO>(`/orders/${orderId}/cancel`)
-    return response.data
+    return this.changeOrderStatus(orderId, { status: OrderStatus.CANCELLED })
   }
 
   /**
