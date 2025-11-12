@@ -68,14 +68,14 @@ export const OrderHistorySidebar = ({ customer }: OrderHistorySidebarProps) => {
         return 'default'
     }
   }
-  
+
   const orders = customer?.recentOrders || []
 
   const totalOrderValue = orders.reduce(
     (sum, order) => sum + ((order.subtotal || 0) - (order.discount || 0)),
     0,
   )
-  
+
   const recentOrders = orders.slice(0, 5) // Show only 5 most recent orders
 
   const showAllOrdersRoute = customer

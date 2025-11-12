@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class SeedAdminAndTickets1761869250000 implements MigrationInterface {
+export class SeedTickets1761869250000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Insert public promotional tickets (no owner - available for everyone)
     await queryRunner.query(`

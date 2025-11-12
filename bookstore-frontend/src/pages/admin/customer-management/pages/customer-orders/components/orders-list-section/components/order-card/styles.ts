@@ -24,6 +24,30 @@ export const OrderHeader = styled.div`
   gap: ${defaultTheme.SPACING.MD};
 `
 
+export const OrderHeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${defaultTheme.SPACING.SM};
+`
+
+export const FullyRefundedBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${defaultTheme.SPACING.XS};
+  padding: ${defaultTheme.SPACING.XS} ${defaultTheme.SPACING.SM};
+  background: linear-gradient(
+    135deg,
+    ${defaultTheme.COLORS.SUCCESS_LIGHTER} 0%,
+    ${defaultTheme.COLORS.SUCCESS_LIGHT} 100%
+  );
+  color: ${defaultTheme.COLORS.SUCCESS_DARK};
+  font-size: ${defaultTheme.FONT_SIZE.XSMALL};
+  font-weight: ${defaultTheme.FONT_WEIGHT.MEDIUM};
+  border-radius: ${defaultTheme.BORDER_RADIUS.SM};
+  border: 1px solid ${defaultTheme.COLORS.SUCCESS_LIGHT};
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+`
+
 export const OrderBasicInfo = styled.div`
   display: flex;
   flex-direction: column;

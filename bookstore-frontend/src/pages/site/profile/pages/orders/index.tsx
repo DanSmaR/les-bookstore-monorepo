@@ -2,8 +2,8 @@ import { ArrowClockwise, Package, Storefront } from 'phosphor-react'
 import { useState } from 'react'
 
 import { Button, NavigationButton } from '@/components'
-import type { OrderDTO, PaymentsDTO } from '@/dtos'
-import { useCard, usePayment } from '@/hooks'
+import type { OrderDTO, PaymentsDTO, RefundRequestDTO } from '@/dtos'
+import { useCard, useOrder, usePayment } from '@/hooks'
 import { Container } from '@/pages/site/layout/styles'
 import { useToast } from '@/providers'
 import { ROUTES } from '@/routes/constants'
@@ -33,6 +33,7 @@ export const Orders = () => {
 
   const { getCards } = useCard()
   const { payOrder, isLoading: isPaymentLoading } = usePayment()
+  const { requestRefund } = useOrder()
   const { showSuccess, showError } = useToast()
 
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
@@ -63,6 +64,17 @@ export const Orders = () => {
     } catch {
       showError('Não foi possível processar o pagamento. Tente novamente.')
     }
+  }
+
+  const handleRequestRefund = async (
+    orderId: string,
+    refundData: RefundRequestDTO,
+  ): Promise<{ success: boolean }> => {
+    const result = await requestRefund(orderId, refundData)
+    if (result.success) {
+      await handleRefreshOrders()
+    }
+    return result
   }
 
   if (isLoading) {
@@ -172,6 +184,7 @@ export const Orders = () => {
                   onCancelOrder={handleCancelOrder}
                   onPayOrder={handlePayOrder}
                   onOrderUpdate={handleRefreshOrders}
+                  onRequestRefund={handleRequestRefund}
                 />
               ))}
             </S.OrdersList>

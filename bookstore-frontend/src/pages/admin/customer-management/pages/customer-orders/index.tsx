@@ -2,6 +2,8 @@ import { ArrowClockwise, Package } from 'phosphor-react'
 import { useParams } from 'react-router'
 
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@/components'
+import type { OrderStatusType, RefundStatusType } from '@/dtos'
+import type { RefundRequestDTO } from '@/dtos/refund'
 
 import { OrdersListSection, SearchAndFilters } from './components'
 import * as S from './styles'
@@ -17,6 +19,10 @@ export const CustomerOrders = () => {
     totalOrders,
     isLoading,
     error,
+
+    // Loading states
+    isStatusLoading,
+    isRefundLoading,
 
     // Pagination
     currentPage,
@@ -38,9 +44,36 @@ export const CustomerOrders = () => {
 
     // Actions
     refreshOrders,
+    handleRequestRefund,
+    handleChangeOrderStatus,
+    handleChangeRefundStatus,
     formatCurrency,
     formatDate,
   } = useCustomerOrders(customerId!)
+
+  // Wrapper functions to match expected signatures
+  const handleRefundRequest = async (
+    _customerId: string,
+    orderId: string,
+    refundData: RefundRequestDTO,
+  ) => {
+    return await handleRequestRefund(orderId, refundData)
+  }
+
+  const handleOrderStatusChange = async (
+    orderId: string,
+    newStatus: OrderStatusType,
+  ) => {
+    await handleChangeOrderStatus(orderId, newStatus)
+  }
+
+  const handleRefundStatusChange = async (
+    orderId: string,
+    refundId: string,
+    newStatus: RefundStatusType,
+  ) => {
+    await handleChangeRefundStatus(orderId, refundId, newStatus)
+  }
 
   if (error) {
     return (
@@ -142,6 +175,7 @@ export const CustomerOrders = () => {
       ) : (
         <OrdersListSection
           orders={orders}
+          customerId={customerId!}
           isLoading={isLoading}
           currentPage={currentPage}
           pageSize={pageSize}
@@ -151,6 +185,11 @@ export const CustomerOrders = () => {
           formatCurrency={formatCurrency}
           formatDate={formatDate}
           onOrderUpdate={refreshOrders}
+          onRequestRefund={handleRefundRequest}
+          onChangeOrderStatus={handleOrderStatusChange}
+          onChangeRefundStatus={handleRefundStatusChange}
+          isOrderStatusLoading={isStatusLoading}
+          isRefundStatusLoading={isRefundLoading}
         />
       )}
     </S.ContentContainer>

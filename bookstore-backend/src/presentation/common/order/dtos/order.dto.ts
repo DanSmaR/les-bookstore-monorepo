@@ -1,8 +1,9 @@
+import { OrderStatus } from '@/domain/order/enums/status.enum';
 import { Order } from '@/domain/order/order.entity';
-import { OrderStatus } from '@/domain/order/status.enum';
 import { TicketResponseDto } from '@/presentation/dtos/ticket.dto';
 
 import { OrderItemDTO } from './order-item.dto';
+import { RefundsSummaryDTO } from './refunds-summary.dto';
 
 export class OrderDTO {
   id: string;
@@ -13,6 +14,8 @@ export class OrderDTO {
   orderDate: Date;
   status: OrderStatus;
   tickets: TicketResponseDto[];
+  refundsSummary?: RefundsSummaryDTO;
+  canBeRefunded: boolean;
 
   constructor(order: Order) {
     this.id = order.id;
@@ -22,19 +25,13 @@ export class OrderDTO {
     this.discount = order.getDiscount();
     this.orderDate = order.orderDate;
     this.status = order.status;
-    this.tickets = (order.tickets || []).map((ticket) => ({
-      id: ticket.id,
-      code: ticket.code,
-      value: ticket.value,
-      type: ticket.type,
-      nature: ticket.nature,
-      validUntil: ticket.validUntil,
-      description: ticket.description,
-      maxDiscount: ticket.maxDiscount,
-      originOrderId: ticket.originOrderId,
-      status: ticket.status,
-      createdAt: ticket.createdAt,
-      updatedAt: ticket.updatedAt,
-    }));
+    this.tickets = (order.tickets || []).map(
+      (ticket) => new TicketResponseDto(ticket),
+    );
+    if (order.refunds && order.refunds.length > 0) {
+      this.refundsSummary = new RefundsSummaryDTO(order.refunds);
+    }
+    this.canBeRefunded =
+      order.canBeRefunded() && !order.isTherePendingRefunds();
   }
 }

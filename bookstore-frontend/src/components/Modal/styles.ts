@@ -14,13 +14,19 @@ export const Overlay = styled.div`
   padding: 20px;
 `
 
-export const ModalContainer = styled.div`
+export const ModalContainer = styled.div<{
+  maxWidth?: string
+  maxHeight?: string
+  width?: string
+  height?: string
+}>`
   background: white;
   border-radius: ${({ theme }) => theme.BORDER_RADIUS.XL};
   box-shadow: ${({ theme }) => theme.SHADOWS.LG};
-  width: 100%;
-  max-width: 480px;
-  max-height: 90vh;
+  width: ${({ width }) => width || '100%'};
+  height: ${({ height }) => height || 'auto'};
+  max-width: ${({ maxWidth }) => maxWidth || '480px'};
+  max-height: ${({ maxHeight }) => maxHeight || '90vh'};
   overflow-y: auto;
   position: relative;
   padding: ${({ theme }) => theme.SPACING.XXL};

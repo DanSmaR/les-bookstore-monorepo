@@ -1,6 +1,6 @@
 import { Gender } from '@/domain/user/enums/gender.enum';
 import { User } from '@/domain/user/user.entity';
-import { OrderDTO } from '@/presentation/common/books/dtos/order.dto';
+import { OrderDTO } from '@/presentation/common/order/dtos/order.dto';
 import { AddressDTO } from '@/presentation/common/users/dtos';
 
 export class CustomerDTO {

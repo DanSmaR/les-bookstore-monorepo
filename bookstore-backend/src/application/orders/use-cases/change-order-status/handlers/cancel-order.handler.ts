@@ -2,8 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { BooksService } from '@/application/books/services/books.service';
 import { UsersService } from '@/application/users/services';
+import { OrderStatus } from '@/domain/order/enums/status.enum';
 import { Order } from '@/domain/order/order.entity';
-import { OrderStatus } from '@/domain/order/status.enum';
 
 import { OrderStatusChangeHandler } from '../order-status-change-handler.interface';
 

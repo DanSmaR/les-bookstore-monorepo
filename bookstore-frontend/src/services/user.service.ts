@@ -1,5 +1,10 @@
 import type { PaginatedResultDTO } from '@/dtos/common'
-import type { OrderDTO } from '@/dtos/order'
+import type {
+  ChangeOrderStatusDTO,
+  ChangeRefundStatusDTO,
+  OrderDTO,
+} from '@/dtos/order'
+import type { RefundRequestDTO } from '@/dtos/refund'
 import type { AddressDTO } from '@/dtos/user/address'
 import type { CustomerDTO } from '@/dtos/user/customer.dto'
 import type { MinUserDTO } from '@/dtos/user/min-user'
@@ -220,5 +225,50 @@ export class UserService {
    */
   static async inactivateUser(userId: string): Promise<void> {
     await AxiosApp.delete(`/users/${userId}`)
+  }
+
+  /**
+   * Change order status for a user (Admin)
+   */
+  static async changeUserOrderStatus(
+    userId: string,
+    orderId: string,
+    statusData: ChangeOrderStatusDTO,
+  ): Promise<OrderDTO> {
+    const response = await AxiosApp.patch<OrderDTO>(
+      `/users/${userId}/orders/${orderId}`,
+      statusData,
+    )
+    return response.data
+  }
+
+  /**
+   * Request a refund for a user's order (Admin)
+   */
+  static async requestUserOrderRefund(
+    userId: string,
+    orderId: string,
+    refundData: RefundRequestDTO,
+  ): Promise<void> {
+    await AxiosApp.post(
+      `/users/${userId}/orders/${orderId}/refunds`,
+      refundData,
+    )
+  }
+
+  /**
+   * Change refund status for a user's order (Admin)
+   */
+  static async changeUserOrderRefundStatus(
+    userId: string,
+    orderId: string,
+    refundId: string,
+    statusData: ChangeRefundStatusDTO,
+  ): Promise<OrderDTO> {
+    const response = await AxiosApp.patch<OrderDTO>(
+      `/users/${userId}/orders/${orderId}/refunds/${refundId}`,
+      statusData,
+    )
+    return response.data
   }
 }

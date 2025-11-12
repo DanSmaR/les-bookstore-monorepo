@@ -3,10 +3,11 @@ import { Transactional } from 'typeorm-transactional';
 
 import { CardsService } from '@/application/users/services/cards.service';
 import { UsersService } from '@/application/users/services/users.service';
+import { OrderStatus } from '@/domain/order/enums/status.enum';
 import { Order } from '@/domain/order/order.entity';
 import { Payment } from '@/domain/order/payment/payment.entity';
-import { OrderStatus } from '@/domain/order/status.enum';
 import { toPaymentMethod } from '@/domain/user/enums/card-type.enum';
+import { User } from '@/domain/user/user.entity';
 import { PaymentsDTO } from '@/presentation/site/orders/dtos/payments.dto';
 
 import { OrderAlreadyFullyPaidException } from '../exceptions/order-already-paid.exception';
@@ -29,16 +30,17 @@ export class PayOrder {
   ) {}
 
   @Transactional()
-  public async execute(orderId: string, payments: PaymentsDTO): Promise<Order> {
+  public async execute(
+    orderId: string,
+    payments: PaymentsDTO,
+    userId: string,
+  ): Promise<Order> {
     const order = await this.ordersService.findByIdOrThrow(orderId);
 
-    // Check if order is already confirmed (prevents duplicate payment attempts)
-    if (order.status === OrderStatus.CONFIRMED) {
-      throw new OrderAlreadyFullyPaidException(order.id);
-    }
-
     this.validate(order, payments);
-    await this.validateAppliedTickets(order);
+
+    const user = await this.usersService.findActiveByIdOrThrow(userId);
+    this.validateAppliedTickets(order, user);
 
     for (const paymentDTO of payments.payments) {
       const paymentIntentRequest: PaymentIntentRequest = {
@@ -79,10 +81,7 @@ export class PayOrder {
           await this.ticketsService.markAsUsed(ticket);
         } else {
           // Public tickets: Track per-user usage (ticket stays ACTIVE for others)
-          await this.usersService.addUsedTicketForUser(
-            order.customer.user.id,
-            ticket,
-          );
+          await this.usersService.addUsedTicketForUser(userId, ticket);
         }
       }
 
@@ -103,10 +102,9 @@ export class PayOrder {
   }
 
   private validate(order: Order, dto: PaymentsDTO) {
-    // Note: We check order.status === CONFIRMED at the beginning of execute()
-    // to prevent duplicate payments. We don't check isFullyPaid() here because
-    // for R$0.00 orders covered by tickets, isFullyPaid() returns true even
-    // when status is still PENDING (tickets cover full amount but order not confirmed yet).
+    if (order.status === OrderStatus.CONFIRMED) {
+      throw new OrderAlreadyFullyPaidException(order.id);
+    }
 
     const pendingPayments = order.getPendingPayments();
 
@@ -137,13 +135,8 @@ export class PayOrder {
     }
   }
 
-  private async validateAppliedTickets(order: Order): Promise<void> {
+  private validateAppliedTickets(order: Order, user: User): void {
     if (!order.tickets || order.tickets.length === 0) return;
-
-    // Load user to check per-user ticket usage
-    const user = await this.usersService.findByIdOrThrow(
-      order.customer.user.id,
-    );
 
     for (const ticket of order.tickets) {
       // Check if ticket is globally valid (not expired, not globally used)

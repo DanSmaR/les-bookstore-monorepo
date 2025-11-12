@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
 
 import { OrdersService } from '@/application/orders/services/orders.service';
+import { OrderStatus } from '@/domain/order/enums/status.enum';
 import { Order } from '@/domain/order/order.entity';
-import { OrderStatus } from '@/domain/order/status.enum';
 
 import { OrderStatusChangeHandler } from './order-status-change-handler.interface';
 
@@ -25,11 +25,9 @@ export class ChangeOrderStatus {
   public async execute(
     orderId: string,
     status: OrderStatus,
-    userId?: string,
+    userId: string,
   ): Promise<Order> {
-    const order = userId
-      ? await this.service.findByIdAndUserOrThrow(orderId, userId)
-      : await this.service.findByIdOrThrow(orderId);
+    const order = await this.service.findByIdAndUserOrThrow(orderId, userId);
 
     const handler = this.handlers.get(status);
     if (handler) {

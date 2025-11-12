@@ -1,19 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
-import type { OrderDTO } from '@/dtos'
-import { useCustomer } from '@/hooks'
-import { useToast } from '@/providers'
-import { UserService } from '@/services'
+import type { OrderStatusType, RefundStatusType } from '@/dtos'
+import type { RefundRequestDTO } from '@/dtos/refund'
+import { useAdminOrder, useCustomer } from '@/hooks'
 import { formatCurrency, formatDateTime } from '@/utils'
-
-interface CustomerOrdersState {
-  orders: OrderDTO[]
-  isLoading: boolean
-  error: string | null
-  totalOrders: number
-  currentPage: number
-  pageSize: number
-}
 
 interface CustomerOrdersFilters {
   searchTerm: string
@@ -24,16 +14,7 @@ interface CustomerOrdersFilters {
 
 export const useCustomerOrders = (customerId: string) => {
   const { getCustomerById } = useCustomer()
-  const { addToast } = useToast()
-
-  const [state, setState] = useState<CustomerOrdersState>({
-    orders: [],
-    isLoading: false,
-    error: null,
-    totalOrders: 0,
-    currentPage: 1,
-    pageSize: 10,
-  })
+  const adminOrder = useAdminOrder(customerId)
 
   const [filters, setFilters] = useState<CustomerOrdersFilters>({
     searchTerm: '',
@@ -80,93 +61,62 @@ export const useCustomerOrders = (customerId: string) => {
     }
   }, [customerId, getCustomerById])
 
-  // Load orders data with filters and pagination
-  const loadOrders = useCallback(async () => {
-    if (!customerId) {
-      return
+  // Load orders when filters change
+  useEffect(() => {
+    if (!customerId) return
+
+    const params = {
+      page: adminOrder.currentPage,
+      pageSize: adminOrder.pageSize,
+      ...(debouncedSearchTerm && { search: debouncedSearchTerm }),
+      ...(filters.statusFilter && { status: filters.statusFilter }),
+      ...(filters.startDate && { startDate: filters.startDate }),
+      ...(filters.endDate && { endDate: filters.endDate }),
     }
 
-    setState((prev) => ({ ...prev, isLoading: true, error: null }))
-
-    try {
-      const params = {
-        page: state.currentPage,
-        pageSize: state.pageSize,
-        ...(debouncedSearchTerm && { search: debouncedSearchTerm }),
-        ...(filters.statusFilter && { status: filters.statusFilter }),
-        ...(filters.startDate && { startDate: filters.startDate }),
-        ...(filters.endDate && { endDate: filters.endDate }),
-      }
-
-      const response = await UserService.getUserOrdersById(customerId, params)
-
-      setState((prev) => ({
-        ...prev,
-        orders: response.items,
-        totalOrders: response.totalCount,
-        isLoading: false,
-        error: null,
-      }))
-    } catch {
-      const errorMessage = 'Erro ao carregar pedidos do cliente'
-      setState((prev) => ({
-        ...prev,
-        orders: [],
-        isLoading: false,
-        error: errorMessage,
-        totalOrders: 0,
-      }))
-      addToast(errorMessage, 'error')
-    }
+    adminOrder.fetchOrders(params)
   }, [
     customerId,
-    state.currentPage,
-    state.pageSize,
     debouncedSearchTerm,
     filters.statusFilter,
     filters.startDate,
     filters.endDate,
-    addToast,
+    adminOrder.currentPage,
+    adminOrder.pageSize,
   ])
 
-  // Load orders when dependencies change
-  useEffect(() => {
-    loadOrders()
-  }, [loadOrders])
+  // Action handlers using adminOrder hook
+  const setSearchTerm = useCallback(
+    (value: string) => {
+      setFilters((prev) => ({ ...prev, searchTerm: value }))
+      adminOrder.goToPage(1) // Reset to first page
+    },
+    [adminOrder],
+  )
 
-  // Filtered orders (client-side filtering for additional filters)
-  const filteredOrders = useMemo(() => {
-    const filtered = [...state.orders]
+  const setStatusFilter = useCallback(
+    (value: string) => {
+      setFilters((prev) => ({ ...prev, statusFilter: value }))
+      adminOrder.goToPage(1) // Reset to first page
+    },
+    [adminOrder],
+  )
 
-    // Additional client-side filtering can be added here if needed
-    // For now, we rely on server-side filtering
+  const setStartDate = useCallback(
+    (value: string) => {
+      setFilters((prev) => ({ ...prev, startDate: value }))
+      adminOrder.goToPage(1) // Reset to first page
+    },
+    [adminOrder],
+  )
 
-    return filtered
-  }, [state.orders])
-
-  // Pagination calculations
-  const totalPages = Math.ceil(state.totalOrders / state.pageSize)
-
-  // Action handlers
-  const setSearchTerm = useCallback((value: string) => {
-    setFilters((prev) => ({ ...prev, searchTerm: value }))
-    setState((prev) => ({ ...prev, currentPage: 1 })) // Reset to first page
-  }, [])
-
-  const setStatusFilter = useCallback((value: string) => {
-    setFilters((prev) => ({ ...prev, statusFilter: value }))
-    setState((prev) => ({ ...prev, currentPage: 1 })) // Reset to first page
-  }, [])
-
-  const setStartDate = useCallback((value: string) => {
-    setFilters((prev) => ({ ...prev, startDate: value }))
-    setState((prev) => ({ ...prev, currentPage: 1 })) // Reset to first page
-  }, [])
-
-  const setEndDate = useCallback((value: string) => {
-    setFilters((prev) => ({ ...prev, endDate: value }))
-    setState((prev) => ({ ...prev, currentPage: 1 })) // Reset to first page
-  }, [])
+  const setEndDate = useCallback(
+    (value: string) => {
+      setFilters((prev) => ({ ...prev, endDate: value }))
+      adminOrder.goToPage(1) // Reset to first page
+    },
+    [adminOrder],
+  )
 
   const clearFilters = useCallback(() => {
     setFilters({
@@ -175,24 +125,30 @@ export const useCustomerOrders = (customerId: string) => {
       startDate: '',
       endDate: '',
     })
-    setState((prev) => ({ ...prev, currentPage: 1 }))
-  }, [])
+    adminOrder.goToPage(1)
+  }, [adminOrder])
 
-  const setCurrentPage = useCallback((page: number) => {
-    setState((prev) => ({ ...prev, currentPage: page }))
-  }, [])
+  // Order action handlers
+  const handleRequestRefund = useCallback(
+    async (orderId: string, refundData: RefundRequestDTO) => {
+      return await adminOrder.requestRefund(orderId, refundData)
+    },
+    [adminOrder],
+  )
 
-  const setPageSize = useCallback((pageSize: number) => {
-    setState((prev) => ({
-      ...prev,
-      pageSize,
-      currentPage: 1, // Reset to first page when changing page size
-    }))
-  }, [])
+  const handleChangeOrderStatus = useCallback(
+    async (orderId: string, status: OrderStatusType) => {
+      return await adminOrder.changeOrderStatus(orderId, status)
+    },
+    [adminOrder],
+  )
 
-  const refreshOrders = useCallback(async () => {
-    await loadOrders()
-  }, [loadOrders])
+  const handleChangeRefundStatus = useCallback(
+    async (orderId: string, refundId: string, status: RefundStatusType) => {
+      return await adminOrder.changeRefundStatus(orderId, refundId, status)
+    },
+    [adminOrder],
+  )
 
   // Format functions
   const formatDate = useCallback((date: Date | string): string => {
@@ -200,19 +156,23 @@ export const useCustomerOrders = (customerId: string) => {
   }, [])
 
   return {
-    // Data
-    orders: filteredOrders,
+    // Data from adminOrder hook
+    orders: adminOrder.orders,
     customerInfo,
-    totalOrders: state.totalOrders,
-    isLoading: state.isLoading,
-    error: state.error,
+    totalOrders: adminOrder.totalOrders,
+    isLoading: adminOrder.isLoading,
+    error: adminOrder.error,
 
-    // Pagination
-    currentPage: state.currentPage,
-    pageSize: state.pageSize,
-    totalPages,
-    setCurrentPage,
-    setPageSize,
+    // Loading states
+    isStatusLoading: adminOrder.isStatusLoading,
+    isRefundLoading: adminOrder.isRefundLoading,
+
+    // Pagination from adminOrder hook
+    currentPage: adminOrder.currentPage,
+    pageSize: adminOrder.pageSize,
+    totalPages: adminOrder.totalPages,
+    setCurrentPage: adminOrder.goToPage,
+    setPageSize: adminOrder.changePageSize,
 
     // Filters
     searchTerm: filters.searchTerm,
@@ -226,7 +186,10 @@ export const useCustomerOrders = (customerId: string) => {
     clearFilters,
 
     // Actions
-    refreshOrders,
+    refreshOrders: adminOrder.refreshOrders,
+    handleRequestRefund,
+    handleChangeOrderStatus,
+    handleChangeRefundStatus,
     formatCurrency,
     formatDate,
   }

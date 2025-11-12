@@ -1,13 +1,19 @@
 import { Package } from 'phosphor-react'
 
 import { Button, Card, CardContent } from '@/components'
-import type { OrderDTO } from '@/dtos'
+import type {
+  OrderDTO,
+  OrderStatusType,
+  RefundRequestDTO,
+  RefundStatusType,
+} from '@/dtos'
 
 import { OrderCard } from './components'
 import * as S from './styles'
 
 interface OrdersListSectionProps {
   orders: OrderDTO[]
+  customerId: string
   isLoading: boolean
   currentPage: number
   pageSize: number
@@ -17,10 +23,27 @@ interface OrdersListSectionProps {
   formatCurrency: (value: number) => string
   formatDate: (date: Date | string) => string
   onOrderUpdate?: () => void
+  onRequestRefund?: (
+    customerId: string,
+    orderId: string,
+    refundData: RefundRequestDTO,
+  ) => Promise<{ success: boolean }>
+  onChangeOrderStatus?: (
+    orderId: string,
+    newStatus: OrderStatusType,
+  ) => Promise<void>
+  onChangeRefundStatus?: (
+    orderId: string,
+    refundId: string,
+    newStatus: RefundStatusType,
+  ) => Promise<void>
+  isOrderStatusLoading?: boolean
+  isRefundStatusLoading?: boolean
 }
 
 export const OrdersListSection = ({
   orders,
+  customerId,
   isLoading,
   currentPage,
   pageSize,
@@ -30,6 +53,11 @@ export const OrdersListSection = ({
   formatCurrency,
   formatDate,
   onOrderUpdate,
+  onRequestRefund,
+  onChangeOrderStatus,
+  onChangeRefundStatus,
+  isOrderStatusLoading = false,
+  isRefundStatusLoading = false,
 }: OrdersListSectionProps) => {
   if (isLoading) {
     return (
@@ -71,9 +99,15 @@ export const OrdersListSection = ({
               <OrderCard
                 key={order.id}
                 order={order}
+                customerId={customerId}
                 formatCurrency={formatCurrency}
                 formatDate={formatDate}
                 onOrderUpdate={onOrderUpdate}
+                onRequestRefund={onRequestRefund}
+                onChangeOrderStatus={onChangeOrderStatus}
+                onChangeRefundStatus={onChangeRefundStatus}
+                isOrderStatusLoading={isOrderStatusLoading}
+                isRefundStatusLoading={isRefundStatusLoading}
               />
             ))}
           </S.OrdersList>

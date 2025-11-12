@@ -9,6 +9,7 @@ import {
 
 import { TicketNature } from '@/domain/ticket/enums/ticket-nature.enum';
 import { TicketType } from '@/domain/ticket/enums/ticket-type.enum';
+import { Ticket } from '@/domain/ticket/ticket.entity';
 
 export class CreatePromotionalTicketDto {
   @IsString()
@@ -78,4 +79,19 @@ export class TicketResponseDto {
   status: string;
   createdAt: Date;
   updatedAt: Date;
+
+  constructor(ticket: Ticket) {
+    this.id = ticket.id;
+    this.code = ticket.code;
+    this.value = ticket.value;
+    this.type = ticket.type;
+    this.nature = ticket.nature;
+    this.validUntil = ticket.validUntil;
+    this.description = ticket.description;
+    this.maxDiscount = ticket.maxDiscount;
+    this.originOrderId = ticket.originOrderId;
+    this.status = ticket.status;
+    this.createdAt = ticket.createdAt;
+    this.updatedAt = ticket.updatedAt;
+  }
 }

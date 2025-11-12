@@ -13,13 +13,18 @@ import { TicketNature } from '../ticket/enums/ticket-nature.enum';
 import { Ticket } from '../ticket/ticket.entity';
 import { Address } from '../user/address.entity';
 import { CustomerDetails } from '../user/customer-details.entity';
+import { RefundStatus } from './enums/refund-status.enum';
+import { OrderStatus } from './enums/status.enum';
 import { OrderItem } from './order-item.entity';
 import { PaymentStatus } from './payment/enums/payment-status.enum';
 import { Payment } from './payment/payment.entity';
-import { OrderStatus } from './status.enum';
+import { Refund } from './refund.entity';
+import { OrderStatusChangeTransformer } from './transformers/order-status-change.transformer';
 
 @Entity('tb_orders')
 export class Order extends DomainEntity {
+  public static readonly MAX_PERIOD_TO_REFUND_IN_DAYS = 30;
+
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order, {
     eager: true,
     cascade: true,
@@ -29,8 +34,15 @@ export class Order extends DomainEntity {
   @Column()
   orderDate: Date = new Date();
 
-  @Column({ type: 'enum', enum: OrderStatus })
-  status: OrderStatus = OrderStatus.PENDING;
+  @Column({ name: 'status', type: 'enum', enum: OrderStatus })
+  _status: OrderStatus = OrderStatus.PENDING;
+
+  @Column({
+    type: 'jsonb',
+    default: [],
+    transformer: OrderStatusChangeTransformer,
+  })
+  statusHistory: OrderStatusChange[] = [];
 
   @ManyToOne(() => Address, { eager: true })
   @JoinColumn()
@@ -54,22 +66,23 @@ export class Order extends DomainEntity {
       referencedColumnName: 'id',
     },
   })
-  tickets: Ticket[];
+  _tickets: Ticket[];
 
   @ManyToOne(() => CustomerDetails, (customer) => customer.orders)
   @JoinColumn()
   customer: CustomerDetails;
 
-  constructor(props: {
-    customer: CustomerDetails;
-    deliveryAddress: Address;
-    tickets?: Ticket[];
-  }) {
+  @OneToMany(() => Refund, (refund) => refund.order, {
+    eager: true,
+    cascade: true,
+  })
+  _refunds: Refund[];
+
+  constructor(props: { customer: CustomerDetails; deliveryAddress: Address }) {
     super();
     if (props) {
       this.customer = props.customer;
       this.deliveryAddress = props.deliveryAddress;
-      this.tickets = props.tickets || [];
     }
   }
 
@@ -85,6 +98,31 @@ export class Order extends DomainEntity {
       this._payments = [];
     }
     return this._payments;
+  }
+
+  get tickets(): Ticket[] {
+    if (!this._tickets) {
+      this._tickets = [];
+    }
+    return this._tickets;
+  }
+
+  get refunds(): Refund[] {
+    if (!this._refunds) {
+      this._refunds = [];
+    }
+    return this._refunds;
+  }
+
+  get status(): OrderStatus {
+    return this._status;
+  }
+
+  set status(newStatus: OrderStatus) {
+    if (this._status !== newStatus) {
+      this._status = newStatus;
+      this.statusHistory.push(new OrderStatusChange(this._status, newStatus));
+    }
   }
 
   public getPromotionalTicket(): Ticket | null {
@@ -226,5 +264,93 @@ export class Order extends DomainEntity {
       throw new Error('Order cannot be cancelled in its current status.');
     }
     this.status = OrderStatus.CANCELLED;
+  }
+
+  public canBeRefunded(): boolean {
+    const deliveredDate = this.statusHistory.find(
+      (change) => change.current === OrderStatus.DELIVERED,
+    )?.at;
+
+    if (!deliveredDate) return false;
+
+    const now = new Date();
+    const diffInMs = now.getTime() - deliveredDate.getTime();
+    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+    return diffInDays <= Order.MAX_PERIOD_TO_REFUND_IN_DAYS;
+  }
+
+  public isTherePendingRefunds(): boolean {
+    if (!this.refunds) return false;
+
+    return this.refunds.some(
+      (refund) =>
+        refund.status !== RefundStatus.COMPLETED &&
+        refund.status !== RefundStatus.REJECTED,
+    );
+  }
+
+  public getRefundableItems(): OrderItem[] {
+    if (!this.canBeRefunded()) return [];
+
+    const refundedQuantities = this.getRefundedQuantitiesByItem();
+
+    return this.items.filter((item) => {
+      const refundedQty = refundedQuantities.get(item.bookId) || 0;
+      return item.quantity > refundedQty;
+    });
+  }
+
+  public getRefundedQuantitiesByItem(): Map<string, number> {
+    const refundedQuantities = new Map<string, number>();
+
+    if (!this.refunds) return refundedQuantities;
+
+    const completedRefunds = this.refunds.filter(
+      (refund) => refund.status === RefundStatus.COMPLETED,
+    );
+
+    for (const refund of completedRefunds) {
+      for (const refundItem of refund.items) {
+        const currentQty =
+          refundedQuantities.get(refundItem.orderItem.bookId) || 0;
+        refundedQuantities.set(
+          refundItem.orderItem.bookId,
+          currentQty + refundItem.quantity,
+        );
+      }
+    }
+
+    return refundedQuantities;
+  }
+
+  public getTotalRefunded(): number {
+    if (!this.refunds) return 0;
+
+    return this.refunds
+      .filter((refund) => refund.status === RefundStatus.COMPLETED)
+      .reduce((sum, refund) => sum + refund.getTotalAmount(), 0);
+  }
+
+  public hasPendingRefunds(): boolean {
+    if (!this.refunds) return false;
+
+    return this.refunds.some(
+      (refund) =>
+        refund.status === RefundStatus.REQUESTED ||
+        refund.status === RefundStatus.APPROVED,
+    );
+  }
+}
+
+export class OrderStatusChange {
+  previous: OrderStatus;
+  current: OrderStatus;
+  at: Date;
+
+  constructor(previous: OrderStatus, current: OrderStatus) {
+    this.previous = previous;
+    this.current = current;
+    this.at = new Date();
   }
 }

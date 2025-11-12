@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import type { OrderDTO, OrderStatusType } from '@/dtos'
+import type { OrderDTO, OrderStatusType, RefundStatusType } from '@/dtos'
+import type { RefundRequestDTO } from '@/dtos/refund'
+import { useToast } from '@/providers'
 import { OrderService, UserService } from '@/services'
 
 interface OrderState {
@@ -20,7 +22,7 @@ interface OrderStatistics {
 
 /**
  * Order Hook
- * Manages order state and provides order-related functions
+ * Manages order state and provides order-related functions for regular users
  * Fetches orders from /me/orders endpoint
  */
 export const useOrder = () => {
@@ -32,6 +34,10 @@ export const useOrder = () => {
     currentPage: 1,
     pageSize: 10,
   })
+
+  const [isStatusLoading, setIsStatusLoading] = useState(false)
+  const [isRefundLoading, setIsRefundLoading] = useState(false)
+  const { showSuccess, showError } = useToast()
 
   /**
    * Fetch user orders from API
@@ -200,16 +206,84 @@ export const useOrder = () => {
    */
   const changeOrderStatus = useCallback(
     async (orderId: string, status: OrderStatusType) => {
+      setIsStatusLoading(true)
       try {
         await OrderService.changeOrderStatus(orderId, { status })
-        // Refresh orders data to get updated orders
-        await fetchOrders()
+        await fetchOrders(orderState.currentPage, orderState.pageSize)
+        showSuccess('O status do pedido foi atualizado com sucesso.')
         return { success: true }
       } catch (error) {
+        showError(
+          'Não foi possível atualizar o status do pedido. Tente novamente.',
+        )
         return { success: false, error }
+      } finally {
+        setIsStatusLoading(false)
       }
     },
-    [fetchOrders],
+    [
+      fetchOrders,
+      orderState.currentPage,
+      orderState.pageSize,
+      showSuccess,
+      showError,
+    ],
+  )
+
+  /**
+   * Request a refund for an order
+   */
+  const requestRefund = useCallback(
+    async (orderId: string, refundData: RefundRequestDTO) => {
+      setIsRefundLoading(true)
+      try {
+        await OrderService.requestRefund(orderId, refundData)
+        await fetchOrders(orderState.currentPage, orderState.pageSize)
+        showSuccess('Solicitação de reembolso enviada com sucesso.')
+        return { success: true }
+      } catch (error) {
+        showError('Não foi possível solicitar o reembolso. Tente novamente.')
+        return { success: false, error }
+      } finally {
+        setIsRefundLoading(false)
+      }
+    },
+    [
+      fetchOrders,
+      orderState.currentPage,
+      orderState.pageSize,
+      showSuccess,
+      showError,
+    ],
+  )
+
+  /**
+   * Change refund status
+   */
+  const changeRefundStatus = useCallback(
+    async (orderId: string, refundId: string, status: RefundStatusType) => {
+      setIsRefundLoading(true)
+      try {
+        await OrderService.changeRefundStatus(orderId, refundId, { status })
+        await fetchOrders(orderState.currentPage, orderState.pageSize)
+        showSuccess('O status do reembolso foi atualizado com sucesso.')
+        return { success: true }
+      } catch (error) {
+        showError(
+          'Não foi possível atualizar o status do reembolso. Tente novamente.',
+        )
+        return { success: false, error }
+      } finally {
+        setIsRefundLoading(false)
+      }
+    },
+    [
+      fetchOrders,
+      orderState.currentPage,
+      orderState.pageSize,
+      showSuccess,
+      showError,
+    ],
   )
 
   // Pagination helper methods
@@ -236,6 +310,10 @@ export const useOrder = () => {
     error: orderState.error,
     totalOrders: orderState.totalOrders,
 
+    // Loading states
+    isStatusLoading,
+    isRefundLoading,
+
     // Pagination state
     currentPage: orderState.currentPage,
     pageSize: orderState.pageSize,
@@ -250,6 +328,8 @@ export const useOrder = () => {
     refreshOrders,
     cancelOrder,
     changeOrderStatus,
+    requestRefund,
+    changeRefundStatus,
     filterOrdersByDateRange,
 
     // Pagination actions

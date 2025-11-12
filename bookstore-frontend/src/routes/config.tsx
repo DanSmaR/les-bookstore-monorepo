@@ -50,9 +50,9 @@ export const routeConfig = [
   {
     path: ROUTES.ADMIN,
     element: (
-      // <ProtectedRoute requiredRoles={['admin']}>
-      <AdminLayout />
-      // </ProtectedRoute>
+      <ProtectedRoute requiredRoles={['admin']}>
+        <AdminLayout />
+      </ProtectedRoute>
     ),
     children: adminRoutes,
   },

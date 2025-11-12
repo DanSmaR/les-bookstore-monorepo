@@ -84,8 +84,7 @@ export class ApplyTicketsToOrder {
     );
 
     // 5. Aplicar APENAS os tickets otimizados (não todos os disponíveis)
-    const selectedTickets = [...promotional, ...optimization.selected];
-    order.tickets = selectedTickets;
+    order.tickets.push(...promotional, ...optimization.selected);
     await this.ordersService.save(order);
 
     // 6. Preparar lista de tickets removidos
@@ -96,13 +95,13 @@ export class ApplyTicketsToOrder {
     }));
 
     return {
-      appliedTickets: selectedTickets,
+      appliedTickets: order.tickets,
       removedTickets,
       invalidTickets,
       optimization: {
         explanation: optimization.explanation,
         changeAmount: optimization.changeAmount,
-        totalDiscount: this.calculateTotalDiscount(selectedTickets, orderValue),
+        totalDiscount: this.calculateTotalDiscount(order.tickets, orderValue),
       },
     };
   }

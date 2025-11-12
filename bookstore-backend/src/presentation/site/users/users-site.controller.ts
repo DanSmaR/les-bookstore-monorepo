@@ -16,7 +16,7 @@ import { AddressDTO, UserDTO } from '@presentation/common/users/dtos';
 import { UserRole } from '@/domain/user/enums/role.enum';
 import { Roles } from '@/infrastructure/auth/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from '@/infrastructure/auth/guards';
-import { OrderDTO } from '@/presentation/common/books/dtos/order.dto';
+import { OrderDTO } from '@/presentation/common/order/dtos/order.dto';
 import { CardDTO } from '@/presentation/common/users/dtos/card.dto';
 import { PaginatedResultDTO } from '@/presentation/dtos/paginated-result.dto';
 import { PaginationParamsDTO } from '@/presentation/dtos/pagination-params.dto';

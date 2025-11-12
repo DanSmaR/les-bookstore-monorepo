@@ -1,8 +1,11 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
   Param,
+  Patch,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -10,8 +13,12 @@ import {
 import { UserRole } from '@/domain/user/enums/role.enum';
 import { Roles } from '@/infrastructure/auth/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from '@/infrastructure/auth/guards';
+import { ChangeOrderStatusDTO } from '@/presentation/common/order/dtos/change-order-status.dto';
+import { ChangeRefundStatusDTO } from '@/presentation/common/order/dtos/change-refund-status.dto';
+import { OrderDTO } from '@/presentation/common/order/dtos/order.dto';
 import { PaginatedResultDTO } from '@/presentation/dtos/paginated-result.dto';
 import { PaginationParamsDTO } from '@/presentation/dtos/pagination-params.dto';
+import { RefundRequestDTO } from '@/presentation/site/orders/dtos/refund-request.dto';
 
 import { CustomerDTO } from './dtos/customer.dto';
 import { MinUserDTO } from './dtos/min-user.dto';
@@ -48,5 +55,38 @@ export class UsersController {
     @Query() filters: Record<string, any> = {},
   ) {
     return this.usersWebService.getOrders(id, query, filters);
+  }
+
+  @Patch(':id/orders/:orderId')
+  public async changeOrderStatus(
+    @Param('id') userId: string,
+    @Param('orderId') orderId: string,
+    @Body() dto: ChangeOrderStatusDTO,
+  ): Promise<OrderDTO> {
+    return this.usersWebService.changeOrderStatus(orderId, dto.status, userId);
+  }
+
+  @Post(':id/orders/:orderId/refunds')
+  public async refundOrderItems(
+    @Param('id') userId: string,
+    @Param('orderId') orderId: string,
+    @Body() dto: RefundRequestDTO,
+  ): Promise<OrderDTO> {
+    return await this.usersWebService.refundItems(orderId, dto, userId);
+  }
+
+  @Patch(':id/orders/:orderId/refunds/:refundId')
+  public async changeRefundStatus(
+    @Param('id') userId: string,
+    @Param('orderId') orderId: string,
+    @Param('refundId') refundId: string,
+    @Body() dto: ChangeRefundStatusDTO,
+  ): Promise<OrderDTO> {
+    return this.usersWebService.changeRefundStatus(
+      orderId,
+      refundId,
+      dto.status,
+      userId,
+    );
   }
 }

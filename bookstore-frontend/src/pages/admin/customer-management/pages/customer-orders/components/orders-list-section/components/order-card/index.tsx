@@ -1,33 +1,99 @@
-import { Calendar, Package } from 'phosphor-react'
+import { Calendar, DotsThreeOutline, Package } from 'phosphor-react'
+import { useState } from 'react'
 
-import { ADMIN_STATUS_CHANGES, Badge, OrderStatusChanger } from '@/components'
-import type { OrderDTO } from '@/dtos'
-import type { OrderStatusType } from '@/dtos'
-import { useOrderStatus } from '@/hooks'
+import {
+  ADMIN_REFUND_STATUS_CHANGES,
+  ADMIN_STATUS_CHANGES,
+  Badge,
+  DropdownMenu,
+  OrderStatusChanger,
+  RefundModal,
+  RefundStatusChanger,
+  RefundSummary,
+} from '@/components'
+import type {
+  OrderDTO,
+  OrderStatusType,
+  RefundRequestDTO,
+  RefundStatusType,
+} from '@/dtos'
 
 import * as S from './styles'
 
 interface OrderCardProps {
   order: OrderDTO
+  customerId: string
   formatCurrency: (value: number) => string
   formatDate: (date: Date | string) => string
   onOrderUpdate?: () => void
+  onRequestRefund?: (
+    customerId: string,
+    orderId: string,
+    refundData: RefundRequestDTO,
+  ) => Promise<{ success: boolean }>
+  onChangeOrderStatus?: (
+    orderId: string,
+    newStatus: OrderStatusType,
+  ) => Promise<void>
+  onChangeRefundStatus?: (
+    orderId: string,
+    refundId: string,
+    newStatus: RefundStatusType,
+  ) => Promise<void>
+  isOrderStatusLoading?: boolean
+  isRefundStatusLoading?: boolean
 }
 
 export const OrderCard = ({
   order,
+  customerId,
   formatCurrency,
   formatDate,
   onOrderUpdate,
+  onRequestRefund,
+  onChangeOrderStatus,
+  onChangeRefundStatus,
+  isOrderStatusLoading = false,
+  isRefundStatusLoading = false,
 }: OrderCardProps) => {
-  const { changeOrderStatus, isLoading } = useOrderStatus()
+  const [isRefundModalOpen, setIsRefundModalOpen] = useState(false)
 
   const handleStatusChange = async (
     orderId: string,
     newStatus: OrderStatusType,
   ) => {
-    await changeOrderStatus(orderId, newStatus)
-    onOrderUpdate?.()
+    if (onChangeOrderStatus) {
+      await onChangeOrderStatus(orderId, newStatus)
+      onOrderUpdate?.()
+    }
+  }
+
+  const handleRefundStatusChange = async (
+    refundId: string,
+    newStatus: RefundStatusType,
+  ) => {
+    if (onChangeRefundStatus) {
+      await onChangeRefundStatus(order.id, refundId, newStatus)
+      onOrderUpdate?.()
+    }
+  }
+
+  const handleRefundClick = () => {
+    setIsRefundModalOpen(true)
+  }
+
+  const handleRefundSubmit = async (refundData: RefundRequestDTO) => {
+    if (!onRequestRefund) return
+
+    try {
+      const result = await onRequestRefund(customerId, order.id, refundData)
+      if (result.success) {
+        setIsRefundModalOpen(false)
+        onOrderUpdate?.()
+      }
+    } catch {
+      // Error handling is done in the parent component
+    }
   }
   const getStatusInfo = (status: string) => {
     switch (status) {
@@ -47,6 +113,7 @@ export const OrderCard = ({
   }
 
   const statusInfo = getStatusInfo(order.status)
+  const canRequestRefund = order.status === 'delivered' && order.canBeRefunded
 
   return (
     <S.OrderCard data-testid="admin-order-card">
@@ -58,13 +125,28 @@ export const OrderCard = ({
             {formatDate(order.orderDate)}
           </S.OrderDate>
         </S.OrderBasicInfo>
-        <Badge
-          variant={statusInfo.variant}
-          size="sm"
-          data-testid="admin-order-status-badge"
-        >
-          {statusInfo.label}
-        </Badge>
+        <S.OrderHeaderActions>
+          <Badge
+            variant={statusInfo.variant}
+            size="sm"
+            data-testid="admin-order-status-badge"
+          >
+            {statusInfo.label}
+          </Badge>
+          {canRequestRefund && (
+            <DropdownMenu
+              trigger={<DotsThreeOutline size={20} />}
+              items={[
+                {
+                  id: 'refund',
+                  label: 'Solicitar reembolso para cliente',
+                  onClick: handleRefundClick,
+                },
+              ]}
+              align="right"
+            />
+          )}
+        </S.OrderHeaderActions>
       </S.OrderHeader>
 
       <S.OrderContent>
@@ -108,13 +190,47 @@ export const OrderCard = ({
           </S.OrderDiscount>
         )}
 
+        {/* Show RefundSummary if there are any refunds */}
+        {(order.refundsSummary?.refundsCount || 0) > 0 && (
+          <RefundSummary
+            refundsSummary={order.refundsSummary!}
+            formatCurrency={formatCurrency}
+            formatDate={formatDate}
+            compact={false}
+          />
+        )}
+
+        {/* Show RefundStatusChanger for all refunds that need admin action */}
+        {order.refundsSummary?.refunds
+          ?.sort(
+            (a, b) =>
+              new Date(b.requestDate).getTime() -
+              new Date(a.requestDate).getTime(),
+          )
+          .map((refund) => (
+            <RefundStatusChanger
+              key={`refund-status-${refund.id}`}
+              refund={refund}
+              availableChanges={ADMIN_REFUND_STATUS_CHANGES}
+              onStatusChange={handleRefundStatusChange}
+              isLoading={isRefundStatusLoading}
+            />
+          ))}
+
         <OrderStatusChanger
           order={order}
           availableChanges={ADMIN_STATUS_CHANGES}
           onStatusChange={handleStatusChange}
-          isLoading={isLoading}
+          isLoading={isOrderStatusLoading}
         />
       </S.OrderContent>
+
+      <RefundModal
+        isOpen={isRefundModalOpen}
+        onClose={() => setIsRefundModalOpen(false)}
+        order={order}
+        onSubmit={handleRefundSubmit}
+      />
     </S.OrderCard>
   )
 }

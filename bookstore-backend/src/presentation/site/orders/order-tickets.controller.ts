@@ -10,7 +10,7 @@ import {
 import {
   ApplyTicketsResult,
   ApplyTicketsToOrder,
-} from '@/application/orders/use-cases/apply-tickets-to-order.use-case';
+} from '@/application/orders/use-cases/apply-tickets-to-order.usecase';
 import { JwtAuthGuard } from '@/infrastructure/auth/guards/jwt-auth.guard';
 
 import { AuthenticatedRequest } from '../../auth/interfaces/authenticated-request.interface';

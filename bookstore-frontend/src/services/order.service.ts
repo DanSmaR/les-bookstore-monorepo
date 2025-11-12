@@ -1,8 +1,10 @@
 import type {
   ChangeOrderStatusDTO,
+  ChangeRefundStatusDTO,
   CreateOrderDTO,
   OrderDTO,
   PaymentsDTO,
+  RefundRequestDTO,
 } from '@/dtos'
 import { OrderStatus } from '@/dtos'
 
@@ -58,6 +60,36 @@ export class OrderService {
     const response = await AxiosApp.post<OrderDTO>(
       `/orders/${orderId}/pay`,
       paymentsData,
+    )
+    return response.data
+  }
+
+  /**
+   * Request a refund for an order
+   * @param orderId - The ID of the order to refund
+   * @param refundData - The refund request data
+   */
+  static async requestRefund(
+    orderId: string,
+    refundData: RefundRequestDTO,
+  ): Promise<void> {
+    await AxiosApp.post(`/orders/${orderId}/refunds`, refundData)
+  }
+
+  /**
+   * Change refund status (User)
+   * @param orderId - The ID of the order
+   * @param refundId - The ID of the refund
+   * @param statusData - The status change data
+   */
+  static async changeRefundStatus(
+    orderId: string,
+    refundId: string,
+    statusData: ChangeRefundStatusDTO,
+  ): Promise<OrderDTO> {
+    const response = await AxiosApp.patch<OrderDTO>(
+      `/orders/${orderId}/refunds/${refundId}`,
+      statusData,
     )
     return response.data
   }
