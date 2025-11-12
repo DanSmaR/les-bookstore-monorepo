@@ -11,6 +11,10 @@ import * as bcrypt from 'bcryptjs';
 import { DataSource } from 'typeorm';
 
 import { Book } from '@/domain/book.entity';
+import { TicketNature } from '@/domain/ticket/enums/ticket-nature.enum';
+import { TicketStatus } from '@/domain/ticket/enums/ticket-status.enum';
+import { TicketType } from '@/domain/ticket/enums/ticket-type.enum';
+import { Ticket } from '@/domain/ticket/ticket.entity';
 import { Address } from '@/domain/user/address.entity';
 import { Gender } from '@/domain/user/enums/gender.enum';
 import { UserRole } from '@/domain/user/enums/role.enum';
@@ -281,6 +285,110 @@ export class TestController {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to create book',
+      };
+    }
+  }
+
+  @Post('create-ticket')
+  @HttpCode(HttpStatus.CREATED)
+  async createTicket(
+    @Body()
+    body: {
+      code: string;
+      value: number;
+      type: 'percentage' | 'raw';
+      nature: 'promotional' | 'exchange';
+      ownerId?: string;
+      validUntil?: string;
+      description?: string;
+      maxDiscount?: number;
+      originOrderId?: string;
+      status?: 'active' | 'used' | 'expired';
+    },
+  ) {
+    const nodeEnv = this.configService.get<string>('NODE_ENV');
+
+    if (nodeEnv !== 'test') {
+      return {
+        success: false,
+        error: 'Ticket creation only allowed in test environment',
+      };
+    }
+
+    try {
+      // Ensure database is connected
+      if (!this.dataSource.isInitialized) {
+        await this.dataSource.initialize();
+      }
+
+      // Map string types to enums
+      const ticketType =
+        body.type === 'percentage' ? TicketType.PERCENTAGE : TicketType.RAW;
+      const ticketNature =
+        body.nature === 'promotional'
+          ? TicketNature.PROMOTIONAL
+          : TicketNature.EXCHANGE;
+      // Default to ACTIVE if status is not provided
+      const ticketStatus =
+        body.status === 'active'
+          ? TicketStatus.ACTIVE
+          : body.status === 'used'
+            ? TicketStatus.USED
+            : body.status === 'expired'
+              ? TicketStatus.EXPIRED
+              : TicketStatus.ACTIVE;
+
+      // Create ticket entity
+      // Only set ownerId if it's explicitly provided (not undefined/null)
+      // This ensures exchange tickets get the correct ownerId
+      const ticketProps: any = {
+        code: body.code,
+        value: body.value,
+        type: ticketType,
+        nature: ticketNature,
+        validUntil: body.validUntil ? new Date(body.validUntil) : undefined,
+        description: body.description,
+        maxDiscount: body.maxDiscount,
+        originOrderId: body.originOrderId,
+        status: ticketStatus,
+      };
+
+      // Explicitly set ownerId only if provided
+      if (body.ownerId !== undefined && body.ownerId !== null) {
+        ticketProps.ownerId = body.ownerId;
+      }
+
+      const ticket = new Ticket(ticketProps);
+
+      console.log(
+        `[createTicket] Creating ticket: ${body.code}, nature: ${ticketNature}, ownerId from body: ${body.ownerId}, ownerId type: ${typeof body.ownerId}, ownerId === undefined: ${body.ownerId === undefined}, ownerId === null: ${body.ownerId === null}, status: ${ticketStatus}`,
+      );
+
+      // Save ticket
+      const ticketRepository = this.dataSource.getRepository(Ticket);
+      const savedTicket = await ticketRepository.save(ticket);
+
+      console.log(
+        `[createTicket] Saved ticket: ${savedTicket.code}, ownerId: ${savedTicket.ownerId}, nature: ${savedTicket.nature}`,
+      );
+
+      return {
+        success: true,
+        ticket: {
+          id: savedTicket.id,
+          code: savedTicket.code,
+          value: savedTicket.value,
+          type: savedTicket.type,
+          nature: savedTicket.nature,
+          ownerId: savedTicket.ownerId,
+        },
+      };
+    } catch (error) {
+      console.error('Ticket creation error:', error);
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Failed to create ticket',
       };
     }
   }

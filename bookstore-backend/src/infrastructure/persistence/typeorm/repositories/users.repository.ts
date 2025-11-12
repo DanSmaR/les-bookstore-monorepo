@@ -32,7 +32,7 @@ export class UsersRepositoryImpl
   public async findActiveById(id: string): Promise<User | null> {
     return await this.repository.findOne({
       where: { id, active: true },
-      relations: ['customerDetails'],
+      relations: ['customerDetails', 'customerDetails._usedTickets'],
     });
   }
 }

@@ -9,6 +9,7 @@ interface FormProps<T extends FieldValues> {
   onSubmit: SubmitHandler<T>
   className?: string
   noPadding?: boolean
+  'data-testid'?: string
 }
 
 export const Form = <T extends FieldValues>({
@@ -17,6 +18,7 @@ export const Form = <T extends FieldValues>({
   onSubmit,
   className,
   noPadding = false,
+  'data-testid': dataTestId,
 }: FormProps<T>) => {
   const { handleSubmit } = form
 
@@ -25,6 +27,7 @@ export const Form = <T extends FieldValues>({
       className={className}
       onSubmit={handleSubmit(onSubmit)}
       $noPadding={noPadding}
+      data-testid={dataTestId}
     >
       {children}
     </S.FormContainer>

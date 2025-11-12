@@ -6,6 +6,9 @@ export const TicketContainer = styled.div`
   background-color: ${(props) => props.theme.COLORS.NEUTRAL_50};
   padding: ${(props) => props.theme.SPACING.LG};
   margin-bottom: ${(props) => props.theme.SPACING.LG};
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 `
 
 export const TicketHeader = styled.div`
@@ -60,13 +63,16 @@ export const TicketList = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${(props) => props.theme.SPACING.SM};
-  max-height: 300px;
+  max-height: 400px;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding-right: ${(props) => props.theme.SPACING.XS};
+  flex-shrink: 0;
 
   /* Custom scrollbar */
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
 
   &::-webkit-scrollbar-track {
@@ -101,6 +107,8 @@ export const TicketCard = styled.label<{ $isSelected: boolean }>`
   border-radius: ${(props) => props.theme.BORDER_RADIUS.MD};
   cursor: pointer;
   transition: all 0.2s;
+  flex-shrink: 0;
+  min-height: fit-content;
 
   &:hover {
     border-color: ${(props) => props.theme.COLORS.PRIMARY_MAIN};
@@ -115,6 +123,7 @@ export const TicketCard = styled.label<{ $isSelected: boolean }>`
     width: 18px;
     height: 18px;
     accent-color: ${(props) => props.theme.COLORS.PRIMARY_MAIN};
+    flex-shrink: 0;
   }
 `
 

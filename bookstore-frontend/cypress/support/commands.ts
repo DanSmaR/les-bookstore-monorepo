@@ -13,6 +13,10 @@ declare global {
       }): Chainable<any>
       setupAuthenticatedUser(userData?: any): Chainable<any>
       setupAuthenticatedAdmin(userData?: any): Chainable<any>
+      seedTicketsForUser(
+        userId: string,
+        token: string,
+      ): Chainable<any>
       setAuthToken(token: { accessToken: string; refreshToken: string }): void
       clearAuth(): void
     }
@@ -106,6 +110,31 @@ Cypress.Commands.add(
         if (response.status === 200 || response.status === 201) {
           const tokenData = response.body
 
+          // Decode JWT token to extract user information
+          // The userId is in the 'sub' claim of the JWT payload
+          const decodeJwtPayload = (token: string) => {
+            try {
+              const parts = token.split('.')
+              if (parts.length !== 3) {
+                return null
+              }
+              const payload = parts[1]
+              const decodedPayload = window.atob(
+                payload.replace(/-/g, '+').replace(/_/g, '/'),
+              )
+              return JSON.parse(decodedPayload)
+            } catch {
+              return null
+            }
+          }
+
+          const payload = decodeJwtPayload(tokenData.accessToken)
+          const userId = payload?.sub || null
+
+          cy.log(
+            `[loginRealUser] Decoded JWT payload - sub (userId): ${userId}, email: ${payload?.email}`,
+          )
+
           // Set authentication in localStorage using the correct key
           cy.window().then((window) => {
             window.localStorage.setItem('auth-token', JSON.stringify(tokenData))
@@ -118,7 +147,7 @@ Cypress.Commands.add(
           return cy.wrap({
             token: tokenData,
             user: {
-              id: tokenData.userId,
+              id: userId,
               email: credentials.email,
             },
           })
@@ -255,6 +284,198 @@ Cypress.Commands.add('setupAuthenticatedAdmin', (userData = {}) => {
         })
       })
   })
+})
+
+/**
+ * Seeds tickets for a test user (public promotional and user-specific tickets)
+ */
+Cypress.Commands.add('seedTicketsForUser', (userId: string, token: string) => {
+  const apiUrl = Cypress.env('API_URL') || 'http://localhost:3000'
+  const validUntil = new Date()
+  validUntil.setDate(validUntil.getDate() + 180) // 180 days from now
+
+  // Debug: Log the userId being used
+  cy.log(`[seedTicketsForUser] Starting with userId: ${userId}`)
+
+  // Public promotional tickets (no ownerId)
+  const publicTickets = [
+    {
+      code: 'PROMO10',
+      value: 10,
+      type: 'percentage' as const,
+      nature: 'promotional' as const,
+      description: 'Desconto de 10% em toda loja',
+      validUntil: validUntil.toISOString(),
+      status: 'active' as const,
+    },
+    {
+      code: 'BLACKFRIDAY',
+      value: 25,
+      type: 'percentage' as const,
+      nature: 'promotional' as const,
+      description: 'Black Friday - 25% OFF',
+      validUntil: validUntil.toISOString(),
+      status: 'active' as const,
+    },
+    {
+      code: 'FRETE50',
+      value: 50.0,
+      type: 'raw' as const,
+      nature: 'promotional' as const,
+      description: 'R$ 50 de desconto',
+      validUntil: validUntil.toISOString(),
+      status: 'active' as const,
+    },
+  ]
+
+  // User-specific promotional ticket
+  const userPromotionalTicket = {
+    code: 'WELCOME15',
+    value: 15,
+    type: 'percentage' as const,
+    nature: 'promotional' as const,
+    ownerId: userId, // This should be the userId passed to the function
+    description: 'Cupom de boas-vindas - 15% OFF',
+    validUntil: validUntil.toISOString(),
+    status: 'active' as const,
+  }
+
+  // Debug: Log the ownerId in userPromotionalTicket
+  cy.log(
+    `[seedTicketsForUser] userPromotionalTicket.ownerId: ${userPromotionalTicket.ownerId}`,
+  )
+
+  // Exchange tickets (user-specific)
+  const exchangeTickets = [
+    {
+      code: 'TROCA100',
+      value: 100.0,
+      type: 'raw' as const,
+      nature: 'exchange' as const,
+      ownerId: userId, // This should be the userId passed to the function
+      description: 'Crédito de troca - R$ 100',
+      validUntil: validUntil.toISOString(),
+      status: 'active' as const,
+    },
+    {
+      code: 'TROCA50',
+      value: 50.0,
+      type: 'raw' as const,
+      nature: 'exchange' as const,
+      ownerId: userId, // This should be the userId passed to the function
+      description: 'Crédito de troca - R$ 50',
+      validUntil: validUntil.toISOString(),
+      status: 'active' as const,
+    },
+  ]
+
+  // Debug: Log the ownerId in exchangeTickets
+  cy.log(
+    `[seedTicketsForUser] exchangeTickets[0].ownerId: ${exchangeTickets[0].ownerId}`,
+  )
+  cy.log(
+    `[seedTicketsForUser] exchangeTickets[1].ownerId: ${exchangeTickets[1].ownerId}`,
+  )
+
+  // Helper function to create a single ticket
+  const createTicket = (ticketData: any) => {
+    // Build body explicitly, ensuring ownerId is included if present
+    const body: any = {
+      code: ticketData.code,
+      value: ticketData.value,
+      type: ticketData.type,
+      nature: ticketData.nature,
+      description: ticketData.description,
+      validUntil: ticketData.validUntil,
+      status: ticketData.status,
+    }
+
+    // Always include ownerId if the property exists in ticketData
+    // Use Object.prototype.hasOwnProperty to check if property exists
+    // Note: We don't check if it's truthy, just if the property exists
+    if (Object.prototype.hasOwnProperty.call(ticketData, 'ownerId')) {
+      body.ownerId = ticketData.ownerId
+      cy.log(
+        `[Cypress] Including ownerId in body: ${ticketData.ownerId} (type: ${typeof ticketData.ownerId})`,
+      )
+    } else {
+      cy.log(`[Cypress] ownerId property not found in ticketData`)
+    }
+
+    // Debug log before request
+    cy.log(
+      `[Cypress] Creating ticket: ${ticketData.code}, ownerId from data: ${ticketData.ownerId}, ownerId in body: ${body.ownerId || 'not set'}, body keys: ${Object.keys(body).join(', ')}`,
+    )
+
+    return cy
+      .request({
+        method: 'POST',
+        url: `${apiUrl}/api/test/create-ticket`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: body,
+        failOnStatusCode: false,
+      })
+      .then((response) => {
+        if (response.status === 201 || response.status === 200) {
+          cy.log(`✅ Successfully created ticket: ${ticketData.code}`)
+          if (response.body?.ticket) {
+            cy.log(
+              `   Saved with ownerId: ${response.body.ticket.ownerId || 'null'}`,
+            )
+          }
+        } else {
+          cy.log(
+            `❌ Failed to create ticket: ${ticketData.code}`,
+            response.body,
+          )
+        }
+        return cy.wrap(response)
+      })
+  }
+
+  // Create all tickets sequentially (chain them)
+  return createTicket(publicTickets[0])
+    .then((response) => {
+      if (response.status === 201 || response.status === 200) {
+        cy.log(`✅ Created public ticket: ${publicTickets[0].code}`)
+      }
+      return createTicket(publicTickets[1])
+    })
+    .then((response) => {
+      if (response.status === 201 || response.status === 200) {
+        cy.log(`✅ Created public ticket: ${publicTickets[1].code}`)
+      }
+      return createTicket(publicTickets[2])
+    })
+    .then((response) => {
+      if (response.status === 201 || response.status === 200) {
+        cy.log(`✅ Created public ticket: ${publicTickets[2].code}`)
+      }
+      return createTicket(userPromotionalTicket)
+    })
+    .then((response) => {
+      if (response.status === 201 || response.status === 200) {
+        cy.log(
+          `✅ Created user promotional ticket: ${userPromotionalTicket.code}`,
+        )
+      }
+      return createTicket(exchangeTickets[0])
+    })
+    .then((response) => {
+      if (response.status === 201 || response.status === 200) {
+        cy.log(`✅ Created exchange ticket: ${exchangeTickets[0].code}`)
+      }
+      return createTicket(exchangeTickets[1])
+    })
+    .then((response) => {
+      if (response.status === 201 || response.status === 200) {
+        cy.log(`✅ Created exchange ticket: ${exchangeTickets[1].code}`)
+      }
+      cy.log('✅ Ticket seeding completed')
+    })
 })
 
 /**

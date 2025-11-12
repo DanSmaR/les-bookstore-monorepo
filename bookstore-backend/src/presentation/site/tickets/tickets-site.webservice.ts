@@ -17,8 +17,9 @@ export class TicketsSiteWebService {
   ) {}
 
   public async getUserTickets(userId: string): Promise<TicketResponseDto[]> {
-    // Get user to check used tickets
-    const user = await this.usersService.findByIdOrThrow(userId);
+    // Get user to check used tickets - use findActiveById which loads customerDetails relation
+    // This ensures customerDetails._usedTickets (which is eager) is properly loaded
+    const user = await this.usersService.findActiveByIdOrThrow(userId);
 
     // Get both personal tickets and public promotional tickets
     const tickets = await this.service.findAvailableForUser(userId);
@@ -26,10 +27,15 @@ export class TicketsSiteWebService {
     // Filter to only active (valid) tickets that the user hasn't used yet
     const availableTickets = tickets.filter((ticket) => {
       // Check if ticket is valid (not expired, not used globally)
-      if (!ticket.isValid()) return false;
+      if (!ticket.isValid()) {
+        return false;
+      }
 
       // Check if user has already used this ticket (per-user tracking)
-      if (user.customerDetails.hasUsedTicket(ticket)) return false;
+      const hasUsed = user.customerDetails.hasUsedTicket(ticket);
+      if (hasUsed) {
+        return false;
+      }
 
       return true;
     });

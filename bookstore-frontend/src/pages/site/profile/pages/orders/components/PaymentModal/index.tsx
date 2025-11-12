@@ -142,7 +142,11 @@ export const PaymentModal = ({
                   <X size={20} />
                 </Button>
               </S.FormHeader>
-              <Form form={cardForm} onSubmit={handleCardFormSubmit}>
+              <Form
+                form={cardForm}
+                onSubmit={handleCardFormSubmit}
+                data-testid="card-form"
+              >
                 <S.FormContent>
                   <FormField
                     form={cardForm}
@@ -195,6 +199,7 @@ export const PaymentModal = ({
                     variant="ghost"
                     onClick={handleCloseAddCardForm}
                     disabled={isSavingCard}
+                    data-testid="cancel-add-card-button"
                   >
                     Cancelar
                   </Button>
@@ -202,6 +207,7 @@ export const PaymentModal = ({
                     type="submit"
                     variant="primary"
                     loading={isSavingCard}
+                    data-testid="save-card-button"
                   >
                     Salvar Cartão
                   </Button>

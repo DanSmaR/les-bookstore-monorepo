@@ -6,7 +6,11 @@ export const ModalContent = styled.div`
   gap: 24px;
   padding: 24px;
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+  }
 `
 
 export const Header = styled.div`
@@ -159,12 +163,24 @@ export const FormContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
+
+  /* Ensure form fields have proper width */
+  input,
+  select {
+    width: 100%;
+    box-sizing: border-box;
+  }
 `
 
 export const FormRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `
 
 export const FormActions = styled.div`

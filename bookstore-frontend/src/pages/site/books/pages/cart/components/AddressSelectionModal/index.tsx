@@ -129,7 +129,11 @@ export const AddressSelectionModal = ({
           {showAddForm ? (
             <S.AddressFormContainer>
               <S.FormTitle>Adicionar Novo Endereço</S.FormTitle>
-              <Form form={addressForm} onSubmit={handleAddAddress}>
+              <Form
+                form={addressForm}
+                onSubmit={handleAddAddress}
+                data-testid="address-form"
+              >
                 <S.FormSectionWrapper>
                   <S.FormGrid>
                     <FormField
@@ -223,6 +227,7 @@ export const AddressSelectionModal = ({
                     variant="ghost"
                     onClick={() => setShowAddForm(false)}
                     disabled={addressForm.formState.isSubmitting}
+                    data-testid="cancel-add-address-button"
                   >
                     Cancelar
                   </Button>
@@ -230,6 +235,7 @@ export const AddressSelectionModal = ({
                     type="submit"
                     variant="primary"
                     loading={addressForm.formState.isSubmitting}
+                    data-testid="save-address-button"
                   >
                     Adicionar Endereço
                   </Button>

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { TicketsRepository } from '@/application/orders/interfaces/tickets.repository';
 import { TicketNature } from '@/domain/ticket/enums/ticket-nature.enum';
@@ -44,15 +44,17 @@ export class TicketsRepositoryImpl
    * - User's personal tickets (owner_id = userId)
    * - Public promotional tickets (owner_id IS NULL AND nature = promotional)
    */
-  findAvailableForUser(userId: string): Promise<Ticket[]> {
-    return this.repository.find({
-      where: [
-        // User's personal tickets (both promotional and exchange)
-        { ownerId: userId },
-        // Public promotional tickets (no owner, anyone can use)
-        { ownerId: IsNull(), nature: TicketNature.PROMOTIONAL },
-      ],
-      order: { createdAt: 'DESC' },
-    });
+  async findAvailableForUser(userId: string): Promise<Ticket[]> {
+    // Use QueryBuilder to ensure proper OR condition handling
+    const tickets = await this.repository
+      .createQueryBuilder('ticket')
+      .where('ticket.ownerId = :userId', { userId })
+      .orWhere('(ticket.ownerId IS NULL AND ticket.nature = :promotional)', {
+        promotional: TicketNature.PROMOTIONAL,
+      })
+      .orderBy('ticket.createdAt', 'DESC')
+      .getMany();
+
+    return tickets;
   }
 }
