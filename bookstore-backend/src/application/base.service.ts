@@ -56,6 +56,22 @@ export abstract class BaseService<E extends DomainEntity> {
     );
   }
 
+  public async findAllInPeriod(
+    targetColumn: string,
+    startDate: Date,
+    endDate: Date,
+    filters: Record<string, any> = {},
+    sortOrder: 'ASC' | 'DESC' = 'ASC',
+  ) {
+    return this.commonRepository.findAllInPeriod(
+      targetColumn,
+      startDate,
+      endDate,
+      filters,
+      sortOrder,
+    );
+  }
+
   @Transactional()
   public async inactivate(id: string): Promise<void> {
     const entity = await this.findByIdOrThrow(id);

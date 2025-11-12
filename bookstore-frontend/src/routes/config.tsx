@@ -4,6 +4,7 @@ import {
   CustomerDetails,
   CustomerOrders,
   CustomersList,
+  Dashboards,
   ErrorPage,
   ProfileEdit,
   SignIn,
@@ -20,6 +21,10 @@ import { PATHS, ROUTES } from './constants'
 // Route configuration using reusable path segments
 export const adminRoutes = [
   {
+    index: true, // Default route for /admin
+    element: <Dashboards />,
+  },
+  {
     path: PATHS.CUSTOMERS, // 'customers' - reusable segment
     element: <CustomersList />,
   },
@@ -30,10 +35,6 @@ export const adminRoutes = [
   {
     path: `${PATHS.CUSTOMERS}/:id/orders`, // 'customers/:id/orders' - customer orders
     element: <CustomerOrders />,
-  },
-  {
-    path: `${PATHS.CUSTOMERS}/${PATHS.NEW}`, // 'customers/new' - composed from segments
-    element: <div>New Customer Form</div>,
   },
   {
     path: PATHS.BOOKS, // 'books' - reusable segment

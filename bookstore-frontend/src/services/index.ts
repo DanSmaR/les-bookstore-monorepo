@@ -1,3 +1,4 @@
+export * from './analytics.service'
 export * from './auth.service'
 export * from './axios-app'
 export * from './book.service'

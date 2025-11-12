@@ -78,7 +78,8 @@ describe('Admin - Order Management', () => {
             Authorization: `Bearer ${testUser.token.accessToken}`,
           },
           body: {
-            title: 'Design Patterns: Elements of Reusable Object-Oriented Software',
+            title:
+              'Design Patterns: Elements of Reusable Object-Oriented Software',
             author: 'Gang of Four',
             publisher: 'Addison-Wesley',
             isbn: '9780201633610',
@@ -116,44 +117,44 @@ describe('Admin - Order Management', () => {
 
           // Create test orders for the customer through the UI flow
           cy.log('✅ Creating test orders for customer through checkout')
-          
+
           // CREATE FIRST ORDER (PAID) - for cancel tests
           if (book1) {
             cy.visit('/catalog')
             cy.wait(1000)
-            
+
             cy.get('[data-testid="book-card"]')
               .contains(book1.title.substring(0, 20))
               .closest('[data-testid="book-card"]')
               .within(() => {
                 cy.get('[data-testid="book-add-to-cart-button"]').click()
               })
-            
+
             cy.wait(1000)
-            
+
             // Go to cart
             cy.get('[data-testid="cart-icon"]').click({ force: true })
             cy.wait(1000)
-            
+
             // Checkout
             cy.get('[data-testid="cart-checkout-button"]').click()
             cy.wait(1000)
-            
+
             // Select address
             cy.get('[data-testid="address-card"]').first().click()
             cy.get('[data-testid="address-confirm-button"]').click()
             cy.wait(1000)
-            
+
             // Navigate to orders to pay
             cy.visit('/orders')
             cy.wait(2000)
-            
+
             // Click pay button for the first pending order
             cy.get('[data-testid="order-pay-button"]', { timeout: 10000 })
               .first()
               .click()
             cy.wait(1000)
-            
+
             // Check if we need to add a card
             cy.get('body').then(($body) => {
               if ($body.find('[data-testid="add-card-button"]').length > 0) {
@@ -169,7 +170,7 @@ describe('Admin - Order Management', () => {
                 })
                 cy.get('[data-testid="save-card-button"]').click()
                 cy.wait(2000)
-                
+
                 // Close form if it didn't close automatically
                 cy.get('body').then(($body2) => {
                   if ($body2.find('[data-testid="card-form"]').length > 0) {
@@ -179,7 +180,7 @@ describe('Admin - Order Management', () => {
                 })
               }
             })
-            
+
             // Select card and pay
             cy.get('[data-testid="payment-card-option"]', { timeout: 10000 })
               .first()
@@ -187,7 +188,7 @@ describe('Admin - Order Management', () => {
             cy.wait(500)
             cy.get('[data-testid="payment-confirm-button"]').click()
             cy.wait(2000)
-            
+
             cy.log('✅ First test order created and PAID (Confirmado)')
           }
 
@@ -195,29 +196,29 @@ describe('Admin - Order Management', () => {
           if (book2) {
             cy.visit('/catalog')
             cy.wait(1000)
-            
+
             cy.get('[data-testid="book-card"]')
               .contains(book2.title.substring(0, 20))
               .closest('[data-testid="book-card"]')
               .within(() => {
                 cy.get('[data-testid="book-add-to-cart-button"]').click()
               })
-            
+
             cy.wait(1000)
-            
+
             // Go to cart
             cy.get('[data-testid="cart-icon"]').click({ force: true })
             cy.wait(1000)
-            
+
             // Checkout
             cy.get('[data-testid="cart-checkout-button"]').click()
             cy.wait(1000)
-            
+
             // Select address
             cy.get('[data-testid="address-card"]').first().click()
             cy.get('[data-testid="address-confirm-button"]').click()
             cy.wait(1000)
-            
+
             // DO NOT PAY - leave as Pendente
             cy.log('✅ Second test order created and left UNPAID (Pendente)')
           }
@@ -226,31 +227,33 @@ describe('Admin - Order Management', () => {
           if (book3) {
             cy.visit('/catalog')
             cy.wait(1000)
-            
+
             cy.get('[data-testid="book-card"]')
               .contains(book3.title.substring(0, 20))
               .closest('[data-testid="book-card"]')
               .within(() => {
                 cy.get('[data-testid="book-add-to-cart-button"]').click()
               })
-            
+
             cy.wait(1000)
-            
+
             // Go to cart
             cy.get('[data-testid="cart-icon"]').click({ force: true })
             cy.wait(1000)
-            
+
             // Checkout
             cy.get('[data-testid="cart-checkout-button"]').click()
             cy.wait(1000)
-            
+
             // Select address
             cy.get('[data-testid="address-card"]').first().click()
             cy.get('[data-testid="address-confirm-button"]').click()
             cy.wait(1000)
-            
+
             // DO NOT PAY - leave as Pendente
-            cy.log('✅ Third test order created and left UNPAID (Pendente) - for cancel test')
+            cy.log(
+              '✅ Third test order created and left UNPAID (Pendente) - for cancel test',
+            )
           }
 
           cy.wait(1000)
@@ -427,7 +430,10 @@ describe('Admin - Order Management', () => {
           cy.wait(1000)
 
           // Verify order is displayed
-          cy.get('[data-testid="admin-order-card"]').should('have.length.at.least', 1)
+          cy.get('[data-testid="admin-order-card"]').should(
+            'have.length.at.least',
+            1,
+          )
           cy.get('[data-testid="admin-order-id"]')
             .first()
             .should('contain', orderId)
@@ -543,7 +549,9 @@ describe('Admin - Order Management', () => {
               cy.wait(500)
 
               // Click "Confirmar" in modal
-              cy.get('[data-testid="confirmation-modal-confirm-button"]').click()
+              cy.get(
+                '[data-testid="confirmation-modal-confirm-button"]',
+              ).click()
               cy.wait(2000)
 
               // Verify order status changed to "Confirmado"
@@ -587,7 +595,9 @@ describe('Admin - Order Management', () => {
               if (statusText.includes('Pendente')) {
                 cy.get('[data-testid="confirm-order-button"]').click()
                 cy.wait(500)
-                cy.get('[data-testid="confirmation-modal-confirm-button"]').click()
+                cy.get(
+                  '[data-testid="confirmation-modal-confirm-button"]',
+                ).click()
                 cy.wait(2000)
               }
 
@@ -597,10 +607,14 @@ describe('Admin - Order Management', () => {
 
               // Verify confirmation modal opens
               cy.get('[data-testid="confirmation-modal"]').should('exist')
-              cy.contains('Confirma que o pedido foi enviado?').should('be.visible')
+              cy.contains('Confirma que o pedido foi enviado?').should(
+                'be.visible',
+              )
 
               // Click "Confirmar"
-              cy.get('[data-testid="confirmation-modal-confirm-button"]').click()
+              cy.get(
+                '[data-testid="confirmation-modal-confirm-button"]',
+              ).click()
               cy.wait(2000)
 
               // Verify order status changed to "Enviado"
@@ -645,19 +659,25 @@ describe('Admin - Order Management', () => {
                 // Confirm
                 cy.get('[data-testid="confirm-order-button"]').click()
                 cy.wait(500)
-                cy.get('[data-testid="confirmation-modal-confirm-button"]').click()
+                cy.get(
+                  '[data-testid="confirmation-modal-confirm-button"]',
+                ).click()
                 cy.wait(2000)
 
                 // Ship
                 cy.get('[data-testid="mark-shipped-button"]').click()
                 cy.wait(500)
-                cy.get('[data-testid="confirmation-modal-confirm-button"]').click()
+                cy.get(
+                  '[data-testid="confirmation-modal-confirm-button"]',
+                ).click()
                 cy.wait(2000)
               } else if (statusText.includes('Confirmado')) {
                 // Ship
                 cy.get('[data-testid="mark-shipped-button"]').click()
                 cy.wait(500)
-                cy.get('[data-testid="confirmation-modal-confirm-button"]').click()
+                cy.get(
+                  '[data-testid="confirmation-modal-confirm-button"]',
+                ).click()
                 cy.wait(2000)
               }
 
@@ -667,10 +687,14 @@ describe('Admin - Order Management', () => {
 
               // Verify confirmation modal opens
               cy.get('[data-testid="confirmation-modal"]').should('exist')
-              cy.contains('Confirma que o pedido foi entregue?').should('be.visible')
+              cy.contains('Confirma que o pedido foi entregue?').should(
+                'be.visible',
+              )
 
               // Click "Confirmar"
-              cy.get('[data-testid="confirmation-modal-confirm-button"]').click()
+              cy.get(
+                '[data-testid="confirmation-modal-confirm-button"]',
+              ).click()
               cy.wait(2000)
 
               // Verify order status changed to "Entregue"
@@ -681,7 +705,9 @@ describe('Admin - Order Management', () => {
               // Verify no action buttons appear
               cy.get('[data-testid="confirm-order-button"]').should('not.exist')
               cy.get('[data-testid="mark-shipped-button"]').should('not.exist')
-              cy.get('[data-testid="mark-delivered-button"]').should('not.exist')
+              cy.get('[data-testid="mark-delivered-button"]').should(
+                'not.exist',
+              )
               cy.get('[data-testid="cancel-order-button"]').should('not.exist')
 
               cy.log('✅ Order marked as delivered successfully')
@@ -721,9 +747,9 @@ describe('Admin - Order Management', () => {
 
               // Verify confirmation modal opens with danger variant
               cy.get('[data-testid="confirmation-modal"]').should('exist')
-              cy.contains('Tem certeza que deseja cancelar este pedido?').should(
-                'be.visible',
-              )
+              cy.contains(
+                'Tem certeza que deseja cancelar este pedido?',
+              ).should('be.visible')
 
               // Click "Cancelar" first
               cy.get('[data-testid="confirmation-modal-cancel-button"]').click()
@@ -737,7 +763,9 @@ describe('Admin - Order Management', () => {
               cy.wait(500)
 
               // Click "Confirmar"
-              cy.get('[data-testid="confirmation-modal-confirm-button"]').click()
+              cy.get(
+                '[data-testid="confirmation-modal-confirm-button"]',
+              ).click()
               cy.wait(2000)
 
               // Verify order status changed to "Cancelado"
@@ -775,7 +803,7 @@ describe('Admin - Order Management', () => {
         .within(() => {
           // Verify cancel button does NOT exist (business rule: only pending orders can be cancelled)
           cy.get('[data-testid="cancel-order-button"]').should('not.exist')
-          
+
           // Verify other appropriate actions are available
           cy.get('[data-testid="mark-shipped-button"]').should('exist')
         })
@@ -871,4 +899,3 @@ describe('Admin - Order Management', () => {
     })
   })
 })
-

@@ -94,9 +94,10 @@ export const AddressFormContainer = styled.div`
   width: 100%;
   overflow: visible;
   min-width: 0;
-  
+
   /* Ensure form inputs can display full placeholder text */
-  input, select {
+  input,
+  select {
     box-sizing: border-box;
     width: 100%;
     min-width: 0;

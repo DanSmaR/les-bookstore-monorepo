@@ -25,6 +25,8 @@ import {
   OrdersRepositoryImpl,
   TicketsRepositoryImpl,
 } from '@/infrastructure/persistence/typeorm/repositories';
+import { AnalyticsController } from '@/presentation/admin/analytics/analytics.controller';
+import { AnalyticsWebService } from '@/presentation/admin/analytics/analytics.webservice';
 import { OrderTicketsController } from '@/presentation/site/orders/order-tickets.controller';
 import { OrdersSiteController } from '@/presentation/site/orders/orders-site.controller';
 import { OrdersSiteWebService } from '@/presentation/site/orders/orders-site.webservice';
@@ -38,8 +40,13 @@ const CONTROLLERS = [
   OrdersSiteController,
   TicketsSiteController,
   OrderTicketsController,
+  AnalyticsController,
 ];
-const WEB_SERVICES = [OrdersSiteWebService, TicketsSiteWebService];
+const WEB_SERVICES = [
+  OrdersSiteWebService,
+  TicketsSiteWebService,
+  AnalyticsWebService,
+];
 const USE_CASES = [
   CreateNewOrder,
   PayOrder,

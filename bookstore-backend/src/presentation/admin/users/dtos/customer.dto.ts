@@ -1,3 +1,4 @@
+import { Order } from '@/domain/order/order.entity';
 import { Gender } from '@/domain/user/enums/gender.enum';
 import { User } from '@/domain/user/user.entity';
 import { OrderDTO } from '@/presentation/common/order/dtos/order.dto';
@@ -17,7 +18,7 @@ export class CustomerDTO {
   updatedAt: Date;
   active: boolean;
 
-  constructor(user: User) {
+  constructor(user: User, recentOrders: Order[]) {
     this.id = user.id;
     this.name = user.name;
     this.email = user.email;
@@ -28,10 +29,7 @@ export class CustomerDTO {
     this.addresses = user.customerDetails.addresses.map(
       (address) => new AddressDTO(address),
     );
-    this.recentOrders = user.customerDetails.orders
-      .sort((a, b) => b.orderDate.getTime() - a.orderDate.getTime())
-      .slice(0, 5)
-      .map((order) => new OrderDTO(order));
+    this.recentOrders = recentOrders.map((order) => new OrderDTO(order));
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;
     this.active = user.active;

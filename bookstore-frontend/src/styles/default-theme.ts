@@ -88,4 +88,17 @@ export const defaultTheme = {
     LG: '0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06)',
     FOCUS: '0 0 0 2px',
   },
+  CHART: {
+    GRID: '#E5E7EB',
+    AXIS: '#6B7280',
+    PRIMARY: '#2563EB',
+    SUCCESS: '#10B981',
+    WARNING: '#F59E0B',
+    ERROR: '#DC2626',
+  },
+  BREAKPOINTS: {
+    MOBILE: '768px',
+    TABLET: '1024px',
+    DESKTOP: '1200px',
+  },
 }

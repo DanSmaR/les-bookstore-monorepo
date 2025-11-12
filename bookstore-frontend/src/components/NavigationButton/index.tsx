@@ -16,7 +16,11 @@ export const NavigationButton = ({
   'data-testid': dataTestId,
 }: NavigationButtonProps) => {
   return (
-    <S.StyledNavigationButton to={to} variant={variant} data-testid={dataTestId}>
+    <S.StyledNavigationButton
+      to={to}
+      variant={variant}
+      data-testid={dataTestId}
+    >
       {children}
     </S.StyledNavigationButton>
   )

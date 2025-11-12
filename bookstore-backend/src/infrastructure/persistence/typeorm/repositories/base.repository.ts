@@ -1,6 +1,13 @@
 import { PaginatedResult } from '@application/paginated-result';
 import { DomainEntity } from '@domain/domain.entity';
-import { FindOptionsOrder, FindOptionsWhere, ILike, Repository } from 'typeorm';
+import {
+  Between,
+  FindOptionsOrder,
+  FindOptionsWhere,
+  ILike,
+  Not,
+  Repository,
+} from 'typeorm';
 
 import { BaseRepository } from '@/application/base.repository';
 
@@ -26,6 +33,25 @@ export abstract class CRUDRepository<E extends DomainEntity>
     return 'createdAt';
   }
 
+  private getSafeDateColumn(targetColumn: string): string {
+    const metadata = this.repository.metadata;
+    const dateColumns = metadata.columns
+      .filter(
+        (column) =>
+          column.type === 'date' ||
+          column.type === 'timestamp' ||
+          column.type === 'timestamptz' ||
+          column.type === Date,
+      )
+      .map((column) => column.propertyName);
+
+    if (dateColumns.includes(targetColumn)) {
+      return targetColumn;
+    }
+
+    return 'createdAt';
+  }
+
   private getSearchableColumns(): string[] {
     const metadata = this.repository.metadata;
     // Filter only string/text columns for searching
@@ -46,9 +72,17 @@ export abstract class CRUDRepository<E extends DomainEntity>
 
     const sanitizedFilters: Record<string, any> = {};
     for (const key in filters) {
-      if (columnNames.includes(key) && filters[key] != null) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        sanitizedFilters[key] = filters[key];
+      if (filters[key] != null) {
+        // Handle exclusion with special syntax (not_fieldName)
+        if (key.startsWith('not_')) {
+          const actualColumn = key.replace('not_', '');
+          if (columnNames.includes(actualColumn)) {
+            sanitizedFilters[actualColumn] = Not(filters[key]);
+          }
+        } else if (columnNames.includes(key)) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          sanitizedFilters[key] = filters[key];
+        }
       }
     }
 
@@ -114,6 +148,27 @@ export abstract class CRUDRepository<E extends DomainEntity>
     });
 
     return new PaginatedResult<E>(entities, total);
+  }
+
+  public async findAllInPeriod(
+    targetColumn: string,
+    startDate: Date,
+    endDate: Date,
+    filters: Record<string, any> = {},
+    sortOrder: 'ASC' | 'DESC' = 'ASC',
+  ): Promise<E[]> {
+    const safeDateColumn = this.getSafeDateColumn(targetColumn);
+    const sanitizedFilters = this.sanitizeFilters(filters);
+
+    return this.repository.find({
+      where: {
+        ...sanitizedFilters,
+        [safeDateColumn]: Between(startDate, endDate),
+      } as FindOptionsWhere<E>,
+      order: {
+        [safeDateColumn]: sortOrder,
+      } as FindOptionsOrder<E>,
+    });
   }
 
   public async save(entity: E): Promise<E> {

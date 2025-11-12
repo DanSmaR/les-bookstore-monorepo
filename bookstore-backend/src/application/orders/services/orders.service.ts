@@ -34,10 +34,9 @@ export class OrdersService extends BaseService<Order> {
     orderId: string,
     userId: string,
   ): Promise<Order> {
-    const user = await this.usersService.findActiveCustomerByIdOrThrow(userId);
-    const order = await this.findByIdOrThrow(orderId);
+    const order = await this.repository.findByIdAndUserId(orderId, userId);
 
-    if (!user.customerDetails.orders.some((o) => o.id === order.id)) {
+    if (!order) {
       throw new BadRequestException(
         `Order with ID ${orderId} does not belong to the user.`,
       );

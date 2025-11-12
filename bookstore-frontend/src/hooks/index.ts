@@ -1,5 +1,6 @@
 export { useAddress } from './use-address'
 export { useAdminOrder } from './use-admin-order'
+export { useAnalytics } from './use-analytics'
 export { useBook } from './use-book'
 export { useCard } from './use-card'
 export { useCustomer } from './use-customer'

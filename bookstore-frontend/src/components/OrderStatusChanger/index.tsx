@@ -104,7 +104,9 @@ export const OrderStatusChanger = ({
                 size="sm"
                 startIcon={config.icon}
                 endIcon={<ArrowRight size={14} />}
-                onClick={() => handleStatusChangeClick(config.nextStatus, config)}
+                onClick={() =>
+                  handleStatusChangeClick(config.nextStatus, config)
+                }
                 disabled={disabled || isLoading}
                 loading={isLoading}
                 data-testid={getDataTestId()}

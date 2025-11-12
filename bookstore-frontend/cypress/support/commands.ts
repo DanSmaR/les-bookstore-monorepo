@@ -13,10 +13,7 @@ declare global {
       }): Chainable<any>
       setupAuthenticatedUser(userData?: any): Chainable<any>
       setupAuthenticatedAdmin(userData?: any): Chainable<any>
-      seedTicketsForUser(
-        userId: string,
-        token: string,
-      ): Chainable<any>
+      seedTicketsForUser(userId: string, token: string): Chainable<any>
       setAuthToken(token: { accessToken: string; refreshToken: string }): void
       clearAuth(): void
     }
@@ -415,7 +412,7 @@ Cypress.Commands.add('seedTicketsForUser', (userId: string, token: string) => {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: body,
+        body,
         failOnStatusCode: false,
       })
       .then((response) => {

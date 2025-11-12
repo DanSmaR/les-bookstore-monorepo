@@ -11,6 +11,13 @@ export interface BaseRepository<E extends DomainEntity> {
     sortField?: string,
     sortOrder?: 'ASC' | 'DESC',
   ): Promise<PaginatedResult<E>>;
+  findAllInPeriod(
+    targetColumn: string,
+    startDate: Date,
+    endDate: Date,
+    filters?: Record<string, any>,
+    sortOrder?: 'ASC' | 'DESC',
+  ): Promise<E[]>;
   save(entity: E): Promise<E>;
   saveAll(entities: E[]): Promise<E[]>;
   deleteById(id: string): Promise<void>;

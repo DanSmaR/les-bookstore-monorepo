@@ -34,9 +34,9 @@ export class CustomerDetails extends DomainEntity {
 
   @OneToMany(() => Order, (order) => order.customer, {
     cascade: true,
-    eager: true,
+    lazy: true,
   })
-  _orders: Order[];
+  _orders: Promise<Order[]>;
 
   @ManyToMany(() => Ticket, { eager: true })
   @JoinTable({
@@ -62,11 +62,8 @@ export class CustomerDetails extends DomainEntity {
     return this._cards;
   }
 
-  get orders(): Order[] {
-    if (!this._orders) {
-      this._orders = [];
-    }
-    return this._orders;
+  get orders(): Promise<Order[]> {
+    return this._orders.then((orders) => orders || []);
   }
 
   get usedTickets(): Ticket[] {
@@ -108,16 +105,24 @@ export class CustomerDetails extends DomainEntity {
     );
   }
 
-  public getMostRecentOrder(): Order | undefined {
-    if (!this.orders || this.orders.length === 0) {
+  public async getMostRecentOrder(): Promise<Order | undefined> {
+    const orders = await this.orders;
+    if (!orders || orders.length === 0) {
       return undefined;
     }
 
-    return this.orders.reduce((mostRecent, current) => {
+    return orders.reduce((mostRecent, current) => {
       if (!mostRecent) return current;
 
       return current.orderDate > mostRecent.orderDate ? current : mostRecent;
     });
+  }
+
+  public async getRecentOrders(count: number): Promise<Order[]> {
+    const orders = await this.orders;
+    return orders
+      .sort((a, b) => b.orderDate.getTime() - a.orderDate.getTime())
+      .slice(0, count);
   }
 
   public hasUsedTicket(ticket: Ticket): boolean;
