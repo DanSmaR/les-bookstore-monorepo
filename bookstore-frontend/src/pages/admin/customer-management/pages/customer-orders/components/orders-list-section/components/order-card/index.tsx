@@ -49,16 +49,20 @@ export const OrderCard = ({
   const statusInfo = getStatusInfo(order.status)
 
   return (
-    <S.OrderCard>
+    <S.OrderCard data-testid="admin-order-card">
       <S.OrderHeader>
         <S.OrderBasicInfo>
-          <S.OrderId>#{order.id}</S.OrderId>
+          <S.OrderId data-testid="admin-order-id">#{order.id}</S.OrderId>
           <S.OrderDate>
             <Calendar size={16} />
             {formatDate(order.orderDate)}
           </S.OrderDate>
         </S.OrderBasicInfo>
-        <Badge variant={statusInfo.variant} size="sm">
+        <Badge
+          variant={statusInfo.variant}
+          size="sm"
+          data-testid="admin-order-status-badge"
+        >
           {statusInfo.label}
         </Badge>
       </S.OrderHeader>

@@ -1678,11 +1678,29 @@ describe('Book Purchase Flow', () => {
       cy.get('[data-testid="cart-icon"]').click({ force: true })
       cy.wait(2000)
 
-      // Verify new exchange ticket appears (should have value around R$ 20.10)
-      cy.contains('TROCA', { timeout: 5000 }).should('be.visible')
+      // Scroll to tickets section first - scroll into view before checking visibility
+      cy.contains('Cupons Disponíveis', { timeout: 5000 }).scrollIntoView()
+      cy.wait(1000) // Wait for scroll to complete
+
+      // Verify new exchange ticket appears by finding the ticket card with TROCA code
+      // The ticket list is in a scrollable container, so we just verify existence
+      // rather than visibility (which fails due to fixed header overlap)
       cy.get('[data-testid="ticket-code"]')
-        .contains(/TROCA/i)
+        .contains(/TROCA-[A-Z0-9-]+/i, { timeout: 5000 }) // Match the generated TROCA ticket code pattern
         .should('exist')
+      
+      // Verify it's within a ticket card
+      cy.get('[data-testid="ticket-code"]')
+        .contains(/TROCA-[A-Z0-9-]+/i)
+        .closest('[data-testid="ticket-card"]')
+        .should('exist')
+      
+      // Verify the ticket nature badge shows "Troca"
+      cy.get('[data-testid="ticket-code"]')
+        .contains(/TROCA-[A-Z0-9-]+/i)
+        .closest('[data-testid="ticket-card"]')
+        .find('[data-testid="ticket-nature"]')
+        .should('contain', 'Troca')
 
       cy.log('✅ Exchange ticket generated when discount exceeded order total')
     })

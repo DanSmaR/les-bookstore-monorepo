@@ -19,7 +19,7 @@ export const AdminHeader = () => {
             <House size={24} />
             <span>Home</span>
           </NavLink>
-          <NavLink to={ROUTES.ADMIN_CUSTOMERS}>
+          <NavLink to={ROUTES.ADMIN_CUSTOMERS} data-testid="customers-link">
             <Users size={24} />
             <span>Clientes</span>
           </NavLink>

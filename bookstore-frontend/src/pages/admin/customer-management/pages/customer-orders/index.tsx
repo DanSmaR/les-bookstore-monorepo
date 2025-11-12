@@ -73,7 +73,12 @@ export const CustomerOrders = () => {
             </S.CustomerInfo>
           )}
         </S.HeaderContent>
-        <Button onClick={refreshOrders} variant="outline" size="sm">
+        <Button
+          onClick={refreshOrders}
+          variant="outline"
+          size="sm"
+          data-testid="refresh-orders-button"
+        >
           <ArrowClockwise size={16} />
           Atualizar
         </Button>
@@ -104,7 +109,7 @@ export const CustomerOrders = () => {
       {/* Orders Statistics */}
       {totalOrders > 0 && (
         <S.StatsContainer>
-          <S.StatCard>
+          <S.StatCard data-testid="total-orders-stat">
             <S.StatIcon>
               <Package size={20} />
             </S.StatIcon>
@@ -113,7 +118,7 @@ export const CustomerOrders = () => {
               <S.StatLabel>Total de Pedidos</S.StatLabel>
             </S.StatContent>
           </S.StatCard>
-          <S.StatCard>
+          <S.StatCard data-testid="filtered-orders-stat">
             <S.StatIcon>
               <Package size={20} />
             </S.StatIcon>

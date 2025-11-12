@@ -147,7 +147,11 @@ export const OrderHistorySidebar = ({ customer }: OrderHistorySidebarProps) => {
               </S.OrdersList>
 
               <S.ShowAllButton>
-                <NavigationButton to={showAllOrdersRoute} variant="secondary">
+                <NavigationButton
+                  to={showAllOrdersRoute}
+                  variant="secondary"
+                  data-testid="show-all-orders-button"
+                >
                   Mostrar tudo
                 </NavigationButton>
               </S.ShowAllButton>

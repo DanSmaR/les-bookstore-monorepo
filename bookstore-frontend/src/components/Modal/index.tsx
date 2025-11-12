@@ -8,9 +8,16 @@ interface ModalProps {
   onClose: () => void
   children: ReactNode
   className?: string
+  'data-testid'?: string
 }
 
-export const Modal = ({ isOpen, onClose, children, className }: ModalProps) => {
+export const Modal = ({
+  isOpen,
+  onClose,
+  children,
+  className,
+  'data-testid': dataTestId,
+}: ModalProps) => {
   if (!isOpen) return null
 
   return (
@@ -18,6 +25,7 @@ export const Modal = ({ isOpen, onClose, children, className }: ModalProps) => {
       <S.ModalContainer
         className={className}
         onClick={(e: MouseEvent) => e.stopPropagation()}
+        data-testid={dataTestId}
       >
         <S.CloseButton onClick={onClose}>
           <X size={20} />

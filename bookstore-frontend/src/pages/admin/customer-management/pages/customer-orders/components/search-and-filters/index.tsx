@@ -46,6 +46,7 @@ export const SearchAndFilters = ({
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
               fullWidth
+              data-testid="order-search-input"
             />
           </S.SearchInputWithIcon>
         </S.SearchInputWrapper>
@@ -61,12 +62,13 @@ export const SearchAndFilters = ({
               placeholder="Todos os status"
               options={[
                 { value: 'pending', label: 'Pendente' },
-                { value: 'processing', label: 'Processando' },
+                { value: 'confirmed', label: 'Confirmado' },
                 { value: 'shipped', label: 'Enviado' },
                 { value: 'delivered', label: 'Entregue' },
                 { value: 'cancelled', label: 'Cancelado' },
               ]}
               fullWidth
+              data-testid="order-status-filter"
             />
           </S.FilterGroup>
 
@@ -77,6 +79,7 @@ export const SearchAndFilters = ({
               value={startDate}
               onChange={(e) => onStartDateChange(e.target.value)}
               fullWidth
+              data-testid="order-start-date-filter"
             />
           </S.FilterGroup>
 
@@ -87,6 +90,7 @@ export const SearchAndFilters = ({
               value={endDate}
               onChange={(e) => onEndDateChange(e.target.value)}
               fullWidth
+              data-testid="order-end-date-filter"
             />
           </S.FilterGroup>
         </S.FiltersGrid>
@@ -98,6 +102,7 @@ export const SearchAndFilters = ({
               size="sm"
               onClick={onClearFilters}
               startIcon={<X size={16} />}
+              data-testid="clear-order-filters-button"
             >
               Limpar Filtros
             </Button>
@@ -106,7 +111,7 @@ export const SearchAndFilters = ({
       </S.FiltersContainer>
 
       <S.ResultsInfo>
-        <span>
+        <span data-testid="order-results-count">
           Mostrando {resultsCount} de {totalCount} pedidos
         </span>
       </S.ResultsInfo>

@@ -63,7 +63,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} data-testid="confirmation-modal">
       <S.Container>
         <S.IconContainer variant={variant}>{getIcon()}</S.IconContainer>
 
@@ -73,13 +73,19 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         </S.Content>
 
         <S.ButtonGroup>
-          <Button variant="ghost" onClick={onClose} type="button">
+          <Button
+            variant="ghost"
+            onClick={onClose}
+            type="button"
+            data-testid="confirmation-modal-cancel-button"
+          >
             {cancelText}
           </Button>
           <Button
             variant={getConfirmButtonVariant()}
             onClick={handleConfirm}
             type="button"
+            data-testid="confirmation-modal-confirm-button"
           >
             {confirmText}
           </Button>

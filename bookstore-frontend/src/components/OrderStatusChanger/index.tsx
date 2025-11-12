@@ -80,20 +80,39 @@ export const OrderStatusChanger = ({
       <S.StatusChangerContainer>
         <S.StatusChangerTitle>Ações Disponíveis</S.StatusChangerTitle>
         <S.StatusChangerActions>
-          {applicableChanges.map((config) => (
-            <Button
-              key={config.nextStatus}
-              variant={config.variant}
-              size="sm"
-              startIcon={config.icon}
-              endIcon={<ArrowRight size={14} />}
-              onClick={() => handleStatusChangeClick(config.nextStatus, config)}
-              disabled={disabled || isLoading}
-              loading={isLoading}
-            >
-              {config.label}
-            </Button>
-          ))}
+          {applicableChanges.map((config) => {
+            // Determine data-testid based on button label
+            const getDataTestId = () => {
+              switch (config.label) {
+                case 'Confirmar Pedido':
+                  return 'confirm-order-button'
+                case 'Cancelar Pedido':
+                  return 'cancel-order-button'
+                case 'Marcar como Enviado':
+                  return 'mark-shipped-button'
+                case 'Marcar como Entregue':
+                  return 'mark-delivered-button'
+                default:
+                  return undefined
+              }
+            }
+
+            return (
+              <Button
+                key={config.nextStatus}
+                variant={config.variant}
+                size="sm"
+                startIcon={config.icon}
+                endIcon={<ArrowRight size={14} />}
+                onClick={() => handleStatusChangeClick(config.nextStatus, config)}
+                disabled={disabled || isLoading}
+                loading={isLoading}
+                data-testid={getDataTestId()}
+              >
+                {config.label}
+              </Button>
+            )
+          })}
         </S.StatusChangerActions>
       </S.StatusChangerContainer>
 
@@ -158,15 +177,8 @@ export const ADMIN_STATUS_CHANGES: StatusChangeConfig[] = [
     requiresConfirmation: true,
     confirmationMessage: 'Tem certeza que deseja cancelar este pedido?',
   },
-  {
-    currentStatus: OrderStatus.CONFIRMED,
-    nextStatus: OrderStatus.CANCELLED,
-    label: 'Cancelar Pedido',
-    icon: <X size={16} />,
-    variant: 'danger',
-    requiresConfirmation: true,
-    confirmationMessage: 'Tem certeza que deseja cancelar este pedido?',
-  },
+  // Note: Confirmed orders cannot be cancelled per business rules
+  // Only pending orders can be cancelled
 ]
 
 export const USER_STATUS_CHANGES: StatusChangeConfig[] = [
