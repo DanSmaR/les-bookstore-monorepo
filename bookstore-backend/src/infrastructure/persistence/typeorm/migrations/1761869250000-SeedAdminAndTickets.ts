@@ -2,37 +2,6 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class SeedAdminAndTickets1761869250000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Insert admin user
-    await queryRunner.query(`
-      INSERT INTO tb_users (
-        id,
-        name,
-        email,
-        cpf,
-        phone,
-        gender,
-        birth_date,
-        password,
-        role,
-        active,
-        created_at,
-        updated_at
-      ) VALUES (
-        '550e8400-e29b-41d4-a716-446655440010',
-        'Admin User',
-        'admin@bookstore.com',
-        '98765432100',
-        '11912345678',
-        'other',
-        '1990-01-01',
-        '$2a$12$0M9jTH82qibgZkVYL8NHU.48qm9fvGZ5IXKX0ZEUnorkoJ9h9kBWi', -- password: "Abc$%123"
-        'admin',
-        true,
-        NOW(),
-        NOW()
-      )
-    `);
-
     // Insert public promotional tickets (no owner - available for everyone)
     await queryRunner.query(`
       INSERT INTO tb_tickets (

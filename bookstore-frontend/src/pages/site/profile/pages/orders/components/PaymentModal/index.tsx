@@ -1,6 +1,6 @@
-import { CreditCard, Plus, Ticket } from 'phosphor-react'
+import { CreditCard, Plus, Ticket, X } from 'phosphor-react'
 
-import { Badge, Button, Input, Modal } from '@/components'
+import { Badge, Button, Form, FormField, Input, Modal } from '@/components'
 import type { OrderDTO, PaymentsDTO } from '@/dtos'
 import { formatCurrency } from '@/utils'
 
@@ -28,10 +28,15 @@ export const PaymentModal = ({
     totalSelectedAmount,
     remainingAmount,
     isPaymentValid,
+    showAddCardForm,
+    isSavingCard,
+    cardForm,
+    handleCardFormSubmit,
     handleCardSelection,
     handleAmountChange,
     handleConfirmPayment,
-    handleAddNewCard,
+    handleOpenAddCardForm,
+    handleCloseAddCardForm,
     handleInputBlur,
     getFormattedCardDisplay,
     getInputValue,
@@ -104,75 +109,178 @@ export const PaymentModal = ({
         )}
 
         <S.CardsSection>
-          <S.SectionTitle>
-            Selecione o(s) cartão(ões) de pagamento
-          </S.SectionTitle>
-
-          {cards.length === 0 ? (
-            <S.EmptyState>
-              <S.EmptyIcon>
-                <CreditCard size={32} />
-              </S.EmptyIcon>
-              <S.EmptyTitle>Nenhum cartão cadastrado</S.EmptyTitle>
-              <S.EmptyDescription>
-                Você precisa ter pelo menos um cartão cadastrado para fazer o
-                pagamento.
-              </S.EmptyDescription>
-              <Button variant="primary" onClick={handleAddNewCard}>
+          <S.SectionHeader>
+            <S.SectionTitle>
+              Selecione o(s) cartão(ões) de pagamento
+            </S.SectionTitle>
+            {!showAddCardForm && cards.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleOpenAddCardForm}
+                data-testid="add-card-button"
+              >
                 <Plus size={16} />
                 Adicionar Cartão
               </Button>
-            </S.EmptyState>
-          ) : (
-            <S.CardsContainer>
-              {cards.map((card) => {
-                const isSelected = selectedCards.some(
-                  (selected) => selected.id === card.id,
-                )
+            )}
+          </S.SectionHeader>
 
-                return (
-                  <S.CardOption
-                    key={card.id}
-                    isSelected={isSelected}
-                    onClick={() => handleCardSelection(card)}
-                    data-testid="payment-card-option"
+          {showAddCardForm ? (
+            <S.CardFormContainer>
+              <S.FormHeader>
+                <S.FormTitle>
+                  <CreditCard size={20} />
+                  Adicionar Cartão
+                </S.FormTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCloseAddCardForm}
+                  disabled={isSavingCard}
+                >
+                  <X size={20} />
+                </Button>
+              </S.FormHeader>
+              <Form form={cardForm} onSubmit={handleCardFormSubmit}>
+                <S.FormContent>
+                  <FormField
+                    form={cardForm}
+                    name="number"
+                    type="creditCard"
+                    label="Número do cartão"
+                    placeholder="0000 0000 0000 0000"
+                  />
+
+                  <FormField
+                    form={cardForm}
+                    name="holderName"
+                    label="Nome do portador"
+                    placeholder="Nome como está no cartão"
+                  />
+
+                  <S.FormRow>
+                    <FormField
+                      form={cardForm}
+                      name="expiryDate"
+                      type="cardExpiry"
+                      label="Validade"
+                      placeholder="MM/AA"
+                    />
+
+                    <FormField
+                      form={cardForm}
+                      name="cvv"
+                      type="cardCVV"
+                      label="CVV"
+                      placeholder="123"
+                    />
+                  </S.FormRow>
+
+                  <FormField
+                    form={cardForm}
+                    name="type"
+                    type="select"
+                    label="Tipo do cartão"
+                    options={[
+                      { value: 'credit', label: 'Crédito' },
+                      { value: 'debit', label: 'Débito' },
+                    ]}
+                  />
+                </S.FormContent>
+
+                <S.FormActions>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleCloseAddCardForm}
+                    disabled={isSavingCard}
                   >
-                    <S.CardInfo>
-                      <S.CardIcon>
-                        <CreditCard size={24} />
-                      </S.CardIcon>
-                      <S.CardDetails>
-                        <S.CardNumber>
-                          {getFormattedCardDisplay(card)}
-                        </S.CardNumber>
-                        <S.CardBrand>
-                          {card.brand}
-                          {' • '}
-                          {card.type === 'credit' ? 'Crédito' : 'Débito'}
-                        </S.CardBrand>
-                      </S.CardDetails>
-                    </S.CardInfo>
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    loading={isSavingCard}
+                  >
+                    Salvar Cartão
+                  </Button>
+                </S.FormActions>
+              </Form>
+            </S.CardFormContainer>
+          ) : (
+            <>
+              {cards.length === 0 ? (
+                <S.EmptyState>
+                  <S.EmptyIcon>
+                    <CreditCard size={32} />
+                  </S.EmptyIcon>
+                  <S.EmptyTitle>Nenhum cartão cadastrado</S.EmptyTitle>
+                  <S.EmptyDescription>
+                    Você precisa ter pelo menos um cartão cadastrado para fazer
+                    o pagamento.
+                  </S.EmptyDescription>
+                  <Button
+                    variant="primary"
+                    onClick={handleOpenAddCardForm}
+                    data-testid="add-card-button"
+                  >
+                    <Plus size={16} />
+                    Adicionar Cartão
+                  </Button>
+                </S.EmptyState>
+              ) : (
+                <S.CardsContainer>
+                  {cards.map((card) => {
+                    const isSelected = selectedCards.some(
+                      (selected) => selected.id === card.id,
+                    )
 
-                    {isSelected && (
-                      <S.CardInputs>
-                        <S.AmountLabel>Valor (R$)</S.AmountLabel>
-                        <Input
-                          type="text"
-                          customSize="sm"
-                          value={getInputValue(card.id)}
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(e) =>
-                            handleAmountChange(card.id, e.target.value)
-                          }
-                          onBlur={() => handleInputBlur(card.id)}
-                          placeholder="0,00"
-                        />
-                      </S.CardInputs>
-                    )}
-                  </S.CardOption>
-                )
-              })}
-            </S.CardsContainer>
+                    return (
+                      <S.CardOption
+                        key={card.id}
+                        isSelected={isSelected}
+                        onClick={() => handleCardSelection(card)}
+                        data-testid="payment-card-option"
+                      >
+                        <S.CardInfo>
+                          <S.CardIcon>
+                            <CreditCard size={24} />
+                          </S.CardIcon>
+                          <S.CardDetails>
+                            <S.CardNumber>
+                              {getFormattedCardDisplay(card)}
+                            </S.CardNumber>
+                            <S.CardBrand>
+                              {card.brand}
+                              {' • '}
+                              {card.type === 'credit' ? 'Crédito' : 'Débito'}
+                            </S.CardBrand>
+                          </S.CardDetails>
+                        </S.CardInfo>
+
+                        {isSelected && (
+                          <S.CardInputs>
+                            <S.AmountLabel>Valor (R$)</S.AmountLabel>
+                            <Input
+                              type="text"
+                              customSize="sm"
+                              value={getInputValue(card.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) =>
+                                handleAmountChange(card.id, e.target.value)
+                              }
+                              onBlur={() => handleInputBlur(card.id)}
+                              placeholder="0,00"
+                            />
+                          </S.CardInputs>
+                        )}
+                      </S.CardOption>
+                    )
+                  })}
+                </S.CardsContainer>
+              )}
+            </>
           )}
         </S.CardsSection>
 

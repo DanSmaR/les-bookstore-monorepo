@@ -1,8 +1,17 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 
-import type { CardDTO, OrderDTO, PaymentsDTO } from '@/dtos'
+import type { CardDTO, CreateCardDTO, OrderDTO, PaymentsDTO } from '@/dtos'
 import { useCard } from '@/hooks'
 import { useToast } from '@/providers'
+import { type CardFormData, cardFormSchema } from '@/schemas'
+import {
+  formatCardCVV,
+  formatCardExpiry,
+  formatCreditCard,
+  removeMask,
+} from '@/utils/input-masks'
 
 interface SelectedCard extends CardDTO {
   amount: number
@@ -21,10 +30,24 @@ export const usePaymentModal = ({
   onPayment,
   onClose,
 }: UsePaymentModalProps) => {
-  const { cards, getCards } = useCard()
-  const { showInfo } = useToast()
+  const { cards, getCards, createCard, isSaving } = useCard()
+  const { showInfo, showSuccess, showError } = useToast()
   const [selectedCards, setSelectedCards] = useState<SelectedCard[]>([])
   const [inputValues, setInputValues] = useState<Record<string, string>>({})
+  const [showAddCardForm, setShowAddCardForm] = useState(false)
+
+  const cardForm = useForm<CardFormData>({
+    resolver: zodResolver(cardFormSchema),
+    defaultValues: {
+      number: '',
+      holderName: '',
+      expiryDate: '',
+      cvv: '',
+      type: 'credit',
+    },
+  })
+
+  const { handleSubmit, reset, setValue } = cardForm
 
   // Load cards when modal opens
   useEffect(() => {
@@ -32,8 +55,10 @@ export const usePaymentModal = ({
       getCards()
       setSelectedCards([])
       setInputValues({})
+      setShowAddCardForm(false)
+      reset()
     }
-  }, [isOpen, getCards])
+  }, [isOpen, getCards, reset])
 
   // Calculate total selected amount
   const totalSelectedAmount = selectedCards.reduce(
@@ -146,9 +171,45 @@ export const usePaymentModal = ({
     return `**** **** **** ${card.last4}`
   }
 
-  const handleAddNewCard = () => {
-    showInfo('Funcionalidade de adicionar cartão em desenvolvimento')
-    // TODO: Implement add new card functionality
+  const handleAddNewCard = async (data: CardFormData) => {
+    try {
+      // Create new card
+      const [month, year] = data.expiryDate.split('/')
+      const expirationDate = new Date(
+        2000 + parseInt(year),
+        parseInt(month) - 1,
+      )
+
+      const cardData: CreateCardDTO = {
+        number: removeMask(data.number),
+        holderName: data.holderName,
+        expirationDate,
+        type: data.type,
+        cvv: data.cvv,
+      }
+
+      await createCard(cardData)
+      showSuccess('Cartão adicionado com sucesso!')
+      setShowAddCardForm(false)
+      reset()
+      // Cards list will be automatically updated by the useCard hook
+    } catch (error) {
+      showError(
+        error instanceof Error
+          ? error.message
+          : 'Erro ao adicionar cartão. Tente novamente.',
+      )
+    }
+  }
+
+  const handleOpenAddCardForm = () => {
+    setShowAddCardForm(true)
+    reset()
+  }
+
+  const handleCloseAddCardForm = () => {
+    setShowAddCardForm(false)
+    reset()
   }
 
   return {
@@ -158,12 +219,19 @@ export const usePaymentModal = ({
     totalSelectedAmount,
     remainingAmount,
     isPaymentValid,
+    showAddCardForm,
+    isSavingCard: isSaving,
+
+    // Form
+    cardForm,
+    handleCardFormSubmit: handleSubmit(handleAddNewCard),
 
     // Actions
     handleCardSelection,
     handleAmountChange,
     handleConfirmPayment,
-    handleAddNewCard,
+    handleOpenAddCardForm,
+    handleCloseAddCardForm,
     handleInputBlur,
 
     // Utilities

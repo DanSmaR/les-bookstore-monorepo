@@ -38,6 +38,9 @@ interface UseCartPageReturn {
 
   // Modal operations
   setShowAddressModal: (show: boolean) => void
+
+  // Address refresh
+  refreshAddresses: () => Promise<void>
 }
 
 export const useCartPage = (): UseCartPageReturn => {
@@ -180,6 +183,14 @@ export const useCartPage = (): UseCartPageReturn => {
     clearSelectedTickets()
   }, [clearSelectedTickets])
 
+  // Refresh addresses handler
+  const refreshAddresses = useCallback(async () => {
+    const result = await getCurrentUser()
+    if (result.success && result.data) {
+      setCurrentUserWithAddresses(result.data)
+    }
+  }, [getCurrentUser])
+
   return {
     // Cart state
     items,
@@ -211,5 +222,8 @@ export const useCartPage = (): UseCartPageReturn => {
 
     // Modal operations
     setShowAddressModal,
+
+    // Address refresh
+    refreshAddresses,
   }
 }

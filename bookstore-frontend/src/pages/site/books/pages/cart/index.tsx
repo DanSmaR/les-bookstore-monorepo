@@ -24,6 +24,7 @@ export const Cart = () => {
     handleCheckout,
     handleAddressSelected,
     setShowAddressModal,
+    refreshAddresses,
   } = useCartPage()
 
   if (isEmpty) {
@@ -72,6 +73,7 @@ export const Cart = () => {
           addresses={currentUserWithAddresses.addresses}
           onConfirm={handleAddressSelected}
           onClose={() => setShowAddressModal(false)}
+          onAddressCreated={refreshAddresses}
         />
       )}
     </S.CartContainer>

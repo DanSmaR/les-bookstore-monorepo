@@ -5,9 +5,10 @@ import { defaultTheme } from '@/styles'
 export const ModalContent = styled.div`
   display: flex;
   flex-direction: column;
-  max-width: 600px;
-  max-height: 80vh;
+  max-width: 700px;
+  max-height: 85vh;
   width: 100%;
+  overflow: hidden;
 `
 
 export const Header = styled.div`
@@ -32,6 +33,8 @@ export const AddressesSection = styled.div`
   flex: 1;
   padding: ${defaultTheme.SPACING.LG};
   overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
 `
 
 export const AddressList = styled.div`
@@ -84,4 +87,75 @@ export const Footer = styled.div`
   padding: ${defaultTheme.SPACING.LG};
   border-top: 1px solid ${defaultTheme.COLORS.NEUTRAL_200};
   background-color: ${defaultTheme.COLORS.NEUTRAL_50};
+`
+
+export const AddressFormContainer = styled.div`
+  padding: 0;
+  width: 100%;
+  overflow: visible;
+  min-width: 0;
+  
+  /* Ensure form inputs can display full placeholder text */
+  input, select {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+  }
+`
+
+export const FormTitle = styled.h3`
+  margin: 0 0 ${defaultTheme.SPACING.LG} 0;
+  font-size: ${defaultTheme.FONT_SIZE.MEDIUM};
+  font-weight: ${defaultTheme.FONT_WEIGHT.BOLD};
+  color: ${defaultTheme.COLORS.NEUTRAL_900};
+  padding: 0;
+`
+
+export const FormSectionWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+`
+
+export const FormGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: ${defaultTheme.SPACING.MD};
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+
+  /* Ensure form fields don't get cropped */
+  & > * {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+`
+
+export const FormActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: ${defaultTheme.SPACING.SM};
+  margin-top: ${defaultTheme.SPACING.LG};
+  padding-top: ${defaultTheme.SPACING.LG};
+  border-top: 1px solid ${defaultTheme.COLORS.NEUTRAL_200};
+`
+
+export const AddressListHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${defaultTheme.SPACING.MD};
+`
+
+export const AddressListTitle = styled.h3`
+  margin: 0;
+  font-size: ${defaultTheme.FONT_SIZE.MEDIUM};
+  font-weight: ${defaultTheme.FONT_WEIGHT.MEDIUM};
+  color: ${defaultTheme.COLORS.NEUTRAL_800};
 `
