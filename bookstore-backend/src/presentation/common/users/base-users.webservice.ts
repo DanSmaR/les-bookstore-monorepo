@@ -27,4 +27,17 @@ export abstract class BaseUsersWebService {
       params.page,
     );
   }
+
+  public async getRecentOrders(userId: string, limit: number = 5) {
+    const result = await this.ordersService.findByUser(
+      userId,
+      1, // First page
+      limit,
+      {}, // No filters
+      'orderDate', // Sort by order date
+      'DESC', // Most recent first
+    );
+
+    return result.items;
+  }
 }

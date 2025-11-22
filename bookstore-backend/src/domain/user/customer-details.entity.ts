@@ -8,7 +8,6 @@ import {
   OneToOne,
 } from 'typeorm';
 
-import { Order } from '../order/order.entity';
 import { Ticket } from '../ticket/ticket.entity';
 import { Address } from './address.entity';
 import { Card } from './card.entity';
@@ -32,12 +31,6 @@ export class CustomerDetails extends DomainEntity {
   })
   _cards: Card[];
 
-  @OneToMany(() => Order, (order) => order.customer, {
-    cascade: true,
-    lazy: true,
-  })
-  _orders: Promise<Order[]>;
-
   @ManyToMany(() => Ticket, { eager: true })
   @JoinTable({
     name: 'tb_used_tickets',
@@ -49,28 +42,15 @@ export class CustomerDetails extends DomainEntity {
   // Collection getters to ensure arrays are always initialized ============
 
   get addresses(): Address[] {
-    if (!this._addresses) {
-      this._addresses = [];
-    }
-    return this._addresses;
+    return (this._addresses ??= []);
   }
 
   get cards(): Card[] {
-    if (!this._cards) {
-      this._cards = [];
-    }
-    return this._cards;
-  }
-
-  get orders(): Promise<Order[]> {
-    return this._orders.then((orders) => orders || []);
+    return (this._cards ??= []);
   }
 
   get usedTickets(): Ticket[] {
-    if (!this._usedTickets) {
-      this._usedTickets = [];
-    }
-    return this._usedTickets;
+    return (this._usedTickets ??= []);
   }
 
   // Business logic methods ================================================
@@ -103,26 +83,6 @@ export class CustomerDetails extends DomainEntity {
     return this.cards.find(
       (c) => c.number === identifier || c.id === identifier,
     );
-  }
-
-  public async getMostRecentOrder(): Promise<Order | undefined> {
-    const orders = await this.orders;
-    if (!orders || orders.length === 0) {
-      return undefined;
-    }
-
-    return orders.reduce((mostRecent, current) => {
-      if (!mostRecent) return current;
-
-      return current.orderDate > mostRecent.orderDate ? current : mostRecent;
-    });
-  }
-
-  public async getRecentOrders(count: number): Promise<Order[]> {
-    const orders = await this.orders;
-    return orders
-      .sort((a, b) => b.orderDate.getTime() - a.orderDate.getTime())
-      .slice(0, count);
   }
 
   public hasUsedTicket(ticket: Ticket): boolean;

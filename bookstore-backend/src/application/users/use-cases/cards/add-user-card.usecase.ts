@@ -13,7 +13,7 @@ export class AddUserCard {
 
   @Transactional()
   public async execute(userId: string, dto: CreateCardDTO): Promise<Card> {
-    const user = await this.usersService.findActiveByIdOrThrow(userId);
+    const user = await this.usersService.findActiveByIdOrThrow(userId, 'User');
 
     if (user.customerDetails.hasCard(dto.number)) {
       throw new ConflictException('Card already exists for this user.');

@@ -68,7 +68,7 @@ export class Order extends DomainEntity {
   })
   _tickets: Ticket[];
 
-  @ManyToOne(() => CustomerDetails, (customer) => customer.orders)
+  @ManyToOne(() => CustomerDetails)
   @JoinColumn()
   customer: CustomerDetails;
 
@@ -87,31 +87,19 @@ export class Order extends DomainEntity {
   }
 
   get items(): OrderItem[] {
-    if (!this._items) {
-      this._items = [];
-    }
-    return this._items;
+    return (this._items ??= []);
   }
 
   get payments(): Payment[] {
-    if (!this._payments) {
-      this._payments = [];
-    }
-    return this._payments;
+    return (this._payments ??= []);
   }
 
   get tickets(): Ticket[] {
-    if (!this._tickets) {
-      this._tickets = [];
-    }
-    return this._tickets;
+    return (this._tickets ??= []);
   }
 
   get refunds(): Refund[] {
-    if (!this._refunds) {
-      this._refunds = [];
-    }
-    return this._refunds;
+    return (this._refunds ??= []);
   }
 
   get status(): OrderStatus {

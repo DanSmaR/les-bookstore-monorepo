@@ -30,8 +30,9 @@ export class UsersWebService extends BaseUsersWebService {
   }
 
   public async findById(id: string): Promise<CustomerDTO> {
-    const user = await this.usersService.findByIdOrThrow(id);
-    return new CustomerDTO(user, await user.customerDetails.getRecentOrders(5));
+    const user = await this.usersService.findByIdOrThrow(id, 'User');
+    const recentOrders = await this.getRecentOrders(user.id, 5);
+    return new CustomerDTO(user, recentOrders);
   }
 
   public async findAll(
@@ -53,13 +54,11 @@ export class UsersWebService extends BaseUsersWebService {
 
     return new PaginatedResultDTO(
       await Promise.all(
-        result.items.map(
-          async (item) =>
-            new MinUserDTO(
-              item,
-              (await item.customerDetails.getMostRecentOrder())?.orderDate,
-            ),
-        ),
+        result.items.map(async (item) => {
+          const recentOrders = await this.getRecentOrders(item.id, 1);
+          const mostRecentOrderDate = recentOrders[0]?.orderDate;
+          return new MinUserDTO(item, mostRecentOrderDate);
+        }),
       ),
       result.count,
       params.limit,

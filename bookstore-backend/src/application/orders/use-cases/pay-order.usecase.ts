@@ -35,11 +35,11 @@ export class PayOrder {
     payments: PaymentsDTO,
     userId: string,
   ): Promise<Order> {
-    const order = await this.ordersService.findByIdOrThrow(orderId);
+    const order = await this.ordersService.findByIdOrThrow(orderId, 'Order');
 
     this.validate(order, payments);
 
-    const user = await this.usersService.findActiveByIdOrThrow(userId);
+    const user = await this.usersService.findActiveByIdOrThrow(userId, 'User');
     this.validateAppliedTickets(order, user);
 
     for (const paymentDTO of payments.payments) {
@@ -54,7 +54,10 @@ export class PayOrder {
       const response =
         await this.paymentGateway.createPayment(paymentIntentRequest);
 
-      const card = await this.cardsService.findByIdOrThrow(paymentDTO.cardId);
+      const card = await this.cardsService.findByIdOrThrow(
+        paymentDTO.cardId,
+        'Card',
+      );
 
       const paymentEntity = new Payment({
         amount: paymentDTO.amount,

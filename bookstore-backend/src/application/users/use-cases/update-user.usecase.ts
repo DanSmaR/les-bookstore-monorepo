@@ -15,7 +15,7 @@ export class UpdateUser {
 
   @Transactional()
   public async execute(id: string, dto: UpdateUserDTO): Promise<User> {
-    const user = await this.usersService.findActiveByIdOrThrow(id);
+    const user = await this.usersService.findActiveByIdOrThrow(id, 'User');
 
     await this.userValidator.validate(dto, id);
 

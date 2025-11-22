@@ -56,7 +56,7 @@ export class TicketsService extends BaseService<Ticket> {
   }
 
   public async deactivate(ticketId: string): Promise<Ticket> {
-    const ticket = await this.findByIdOrThrow(ticketId);
+    const ticket = await this.findByIdOrThrow(ticketId, 'Ticket');
     ticket.status = TicketStatus.EXPIRED;
     return await this.save(ticket);
   }

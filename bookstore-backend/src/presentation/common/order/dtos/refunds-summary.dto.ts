@@ -31,7 +31,7 @@ export class RefundDTO {
     this.id = refund.id;
     this.status = refund.status;
     this.requestDate = refund.requestDate;
-    this.processedAt = refund.processedAt;
+    this.processedAt = refund.completedAt;
     this.totalAmount = refund.getTotalAmount();
     this.reason = refund.reason;
     this.items = refund.items.map((item) => new RefundItemSummaryDTO(item));

@@ -12,7 +12,7 @@ export class RemoveUserAddress {
 
   @Transactional()
   async execute(userId: string, addressId: string): Promise<void> {
-    const user = await this.usersService.findActiveByIdOrThrow(userId);
+    const user = await this.usersService.findActiveByIdOrThrow(userId, 'User');
 
     const address = user.customerDetails.getAddress(addressId);
 

@@ -19,7 +19,7 @@ export class TicketsSiteWebService {
   public async getUserTickets(userId: string): Promise<TicketResponseDto[]> {
     // Get user to check used tickets - use findActiveById which loads customerDetails relation
     // This ensures customerDetails._usedTickets (which is eager) is properly loaded
-    const user = await this.usersService.findActiveByIdOrThrow(userId);
+    const user = await this.usersService.findActiveByIdOrThrow(userId, 'User');
 
     // Get both personal tickets and public promotional tickets
     const tickets = await this.service.findAvailableForUser(userId);

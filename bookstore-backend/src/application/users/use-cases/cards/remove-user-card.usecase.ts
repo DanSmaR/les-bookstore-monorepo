@@ -10,7 +10,7 @@ export class RemoveUserCard {
 
   @Transactional()
   public async execute(userId: string, cardId: string): Promise<void> {
-    const user = await this.usersService.findActiveByIdOrThrow(userId);
+    const user = await this.usersService.findActiveByIdOrThrow(userId, 'User');
 
     const card = user.customerDetails.getCard(cardId);
 

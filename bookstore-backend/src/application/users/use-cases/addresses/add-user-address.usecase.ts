@@ -10,7 +10,7 @@ export class AddUserAddress {
 
   @Transactional()
   async execute(userId: string, dto: CreateAddressDTO): Promise<Address> {
-    const user = await this.usersService.findActiveByIdOrThrow(userId);
+    const user = await this.usersService.findActiveByIdOrThrow(userId, 'User');
 
     const address = new Address(dto);
 

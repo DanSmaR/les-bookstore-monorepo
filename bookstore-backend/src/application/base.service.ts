@@ -23,19 +23,25 @@ export abstract class BaseService<E extends DomainEntity> {
     return this.commonRepository.findById(id);
   }
 
-  public async findByIdOrThrow(id: string): Promise<E> {
+  public async findByIdOrThrow(
+    id: string,
+    entityName: string = 'Entity',
+  ): Promise<E> {
     const entity = await this.commonRepository.findById(id);
     if (!entity) {
-      throw new EntityNotFoundException('Entity', id);
+      throw new EntityNotFoundException(entityName, id);
     }
     return entity;
   }
 
-  public async findActiveByIdOrThrow(id: string): Promise<E> {
-    const entity = await this.findByIdOrThrow(id);
+  public async findActiveByIdOrThrow(
+    id: string,
+    entityName: string = 'Entity',
+  ): Promise<E> {
+    const entity = await this.findByIdOrThrow(id, entityName);
 
     if (!entity.active) {
-      throw new UnactiveException('Entity', id);
+      throw new UnactiveException(entityName, id);
     }
     return entity;
   }
@@ -74,14 +80,20 @@ export abstract class BaseService<E extends DomainEntity> {
 
   @Transactional()
   public async inactivate(id: string): Promise<void> {
-    const entity = await this.findByIdOrThrow(id);
+    const entity = await this.findByIdOrThrow(id, 'Entity');
     entity.inactivate();
     await this.save(entity);
   }
 
+  public async delete(id: string): Promise<void>;
+  public async delete(entity: E): Promise<void>;
+
   @Transactional()
-  public async delete(id: string): Promise<void> {
-    const entity = await this.findByIdOrThrow(id);
-    await this.commonRepository.delete(entity);
+  public async delete(entity: string | E): Promise<void> {
+    const entityToDelete =
+      typeof entity === 'string'
+        ? await this.findByIdOrThrow(entity, 'Entity')
+        : entity;
+    await this.commonRepository.delete(entityToDelete);
   }
 }

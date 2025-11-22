@@ -28,7 +28,7 @@ export class UsersService extends BaseService<User> {
   }
 
   public async findActiveCustomerByIdOrThrow(id: string): Promise<User> {
-    const user = await this.findActiveByIdOrThrow(id);
+    const user = await this.findActiveByIdOrThrow(id, 'User');
     if (user.role === UserRole.ADMIN) {
       throw new Error(`User with id ${id} is not a customer`);
     }
@@ -36,7 +36,7 @@ export class UsersService extends BaseService<User> {
   }
 
   public async reinstateTicketForUser(userId: string, ticket: Ticket) {
-    const user = await this.findByIdOrThrow(userId);
+    const user = await this.findByIdOrThrow(userId, 'User');
     user.customerDetails.reinstateTicket(ticket);
     await this.usersRepository.save(user);
   }
@@ -49,7 +49,7 @@ export class UsersService extends BaseService<User> {
     userId: string,
     ticket: Ticket,
   ): Promise<void> {
-    const user = await this.findByIdOrThrow(userId);
+    const user = await this.findByIdOrThrow(userId, 'User');
     user.customerDetails.addUsedTicket(ticket);
     await this.usersRepository.save(user);
   }
@@ -60,7 +60,7 @@ export class UsersService extends BaseService<User> {
   ): Promise<void> {
     if (!tickets || tickets.length === 0) return;
 
-    const user = await this.findByIdOrThrow(userId);
+    const user = await this.findByIdOrThrow(userId, 'User');
     for (const ticket of tickets) {
       if (ticket.ownerId) {
         // Personal tickets: Reactivate globally (change status back to ACTIVE)

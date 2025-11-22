@@ -3,6 +3,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { BaseService } from '@/application/base.service';
 import { PaginatedResult } from '@/application/paginated-result';
 import { UsersService } from '@/application/users/services';
+import { Book } from '@/domain/book.entity';
 import { Order } from '@/domain/order/order.entity';
 
 import { OrdersRepository } from '../interfaces/orders.repository';
@@ -43,5 +44,12 @@ export class OrdersService extends BaseService<Order> {
     }
 
     return order;
+  }
+
+  public async findLastBoughtBooksByUser(
+    userId: string,
+    limit: number = 10,
+  ): Promise<Book[]> {
+    return await this.repository.findLastBoughtBooksByUser(userId, limit);
   }
 }

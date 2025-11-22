@@ -40,7 +40,7 @@ export class UsersSiteWebService extends BaseUsersWebService {
   }
 
   public async getProfile(userId: string): Promise<UserDTO> {
-    const user = await this.usersService.findByIdOrThrow(userId);
+    const user = await this.usersService.findByIdOrThrow(userId, 'User');
     return new UserDTO(user);
   }
 
@@ -67,7 +67,7 @@ export class UsersSiteWebService extends BaseUsersWebService {
   }
 
   public async getAddresses(userId: string): Promise<AddressDTO[]> {
-    const user = await this.usersService.findActiveByIdOrThrow(userId);
+    const user = await this.usersService.findActiveByIdOrThrow(userId, 'User');
     return user.customerDetails.addresses.map(
       (address) => new AddressDTO(address),
     );
@@ -99,7 +99,7 @@ export class UsersSiteWebService extends BaseUsersWebService {
   }
 
   public async getCards(userId: string): Promise<CardDTO[]> {
-    const user = await this.usersService.findActiveByIdOrThrow(userId);
+    const user = await this.usersService.findActiveByIdOrThrow(userId, 'User');
     return user.customerDetails.cards.map((card) => new CardDTO(card));
   }
 

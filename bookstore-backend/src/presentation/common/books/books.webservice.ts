@@ -44,6 +44,6 @@ export class BooksWebService {
   }
 
   public async findById(id: string): Promise<BookDTO> {
-    return new BookDTO(await this.service.findByIdOrThrow(id));
+    return new BookDTO(await this.service.findByIdOrThrow(id, 'Book'));
   }
 }

@@ -15,7 +15,7 @@ export class UpdateUserAddress {
     addressId: string,
     dto: UpdateAddressDTO,
   ): Promise<Address> {
-    const user = await this.usersService.findActiveByIdOrThrow(userId);
+    const user = await this.usersService.findActiveByIdOrThrow(userId, 'User');
 
     const address = user.customerDetails.getAddress(addressId);
 

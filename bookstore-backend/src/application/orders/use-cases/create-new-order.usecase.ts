@@ -24,7 +24,7 @@ export class CreateNewOrder {
 
   @Transactional()
   public async execute(dto: CreateNewOrderDTO, userId: string): Promise<Order> {
-    const user = await this.usersService.findActiveByIdOrThrow(userId);
+    const user = await this.usersService.findActiveByIdOrThrow(userId, 'User');
 
     this.validate(dto, user);
     const deliveryAddress = user.customerDetails.getAddress(
@@ -40,7 +40,7 @@ export class CreateNewOrder {
     // This allows for multi-ticket optimization (RN0036)
 
     for (const item of dto.items) {
-      const book = await this.booksService.findByIdOrThrow(item.bookId);
+      const book = await this.booksService.findByIdOrThrow(item.bookId, 'Book');
 
       if (!book.isInStock(item.quantity)) {
         throw new BadRequestException(

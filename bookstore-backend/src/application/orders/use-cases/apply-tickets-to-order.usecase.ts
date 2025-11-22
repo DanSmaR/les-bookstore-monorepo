@@ -33,7 +33,7 @@ export class ApplyTicketsToOrder {
     availableTicketCodes: string[],
     userId: string,
   ): Promise<ApplyTicketsResult> {
-    const order = await this.ordersService.findByIdOrThrow(orderId);
+    const order = await this.ordersService.findByIdOrThrow(orderId, 'Order');
 
     const validTickets: Ticket[] = [];
     const invalidTickets: string[] = [];
