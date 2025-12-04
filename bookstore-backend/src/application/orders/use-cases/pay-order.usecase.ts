@@ -93,7 +93,7 @@ export class PayOrder {
 
       if (overpaymentAmount > 0) {
         await this.generateExchangeTicket.execute({
-          userId: order.customer.user.id,
+          userId: userId, // Use the userId parameter instead of order.customer.user.id
           originOrderId: order.id,
           amount: overpaymentAmount,
           reason: 'overpayment',
