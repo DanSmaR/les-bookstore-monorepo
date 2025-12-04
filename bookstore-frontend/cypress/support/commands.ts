@@ -134,20 +134,17 @@ Cypress.Commands.add(
           )
 
           // Set authentication in localStorage using the correct key
-          cy.window().then((window) => {
+          // Chain the return to ensure localStorage is set before continuing
+          return cy.window().then((window) => {
             window.localStorage.setItem('auth-token', JSON.stringify(tokenData))
-          })
-
-          // Reload the page to trigger AuthProvider initialization
-          // This ensures axios headers are set properly
-          cy.reload()
-
-          return cy.wrap({
-            token: tokenData,
-            user: {
-              id: userId,
-              email: credentials.email,
-            },
+            
+            return {
+              token: tokenData,
+              user: {
+                id: userId,
+                email: credentials.email,
+              },
+            }
           })
         } else {
           cy.log('Login failed:', response.body)
@@ -158,16 +155,16 @@ Cypress.Commands.add(
             refreshToken: 'mock-refresh-token',
           }
 
-          cy.window().then((window) => {
+          return cy.window().then((window) => {
             window.localStorage.setItem('auth-token', JSON.stringify(mockToken))
-          })
-
-          return cy.wrap({
-            token: mockToken,
-            user: {
-              id: 'mock-user-id',
-              email: credentials.email,
-            },
+            
+            return {
+              token: mockToken,
+              user: {
+                id: 'mock-user-id',
+                email: credentials.email,
+              },
+            }
           })
         }
       })
