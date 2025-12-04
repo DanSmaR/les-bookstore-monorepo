@@ -11,6 +11,8 @@ import * as bcrypt from 'bcryptjs';
 import { DataSource } from 'typeorm';
 
 import { Book } from '@/domain/book.entity';
+import { Order } from '@/domain/order/order.entity';
+import { OrderItem } from '@/domain/order/order-item.entity';
 import { TicketNature } from '@/domain/ticket/enums/ticket-nature.enum';
 import { TicketStatus } from '@/domain/ticket/enums/ticket-status.enum';
 import { TicketType } from '@/domain/ticket/enums/ticket-type.enum';
@@ -389,6 +391,111 @@ export class TestController {
         success: false,
         error:
           error instanceof Error ? error.message : 'Failed to create ticket',
+      };
+    }
+  }
+
+  @Post('create-order')
+  @HttpCode(HttpStatus.CREATED)
+  async createOrder(
+    @Body()
+    body: {
+      userId: string;
+      bookId: string;
+      quantity?: number;
+    },
+  ) {
+    const nodeEnv = this.configService.get<string>('NODE_ENV');
+
+    if (nodeEnv !== 'test') {
+      return {
+        success: false,
+        error: 'Order creation only allowed in test environment',
+      };
+    }
+
+    try {
+      // Ensure database is connected
+      if (!this.dataSource.isInitialized) {
+        await this.dataSource.initialize();
+      }
+
+      const userRepository = this.dataSource.getRepository(User);
+      const user = await userRepository.findOne({
+        where: { id: body.userId },
+        relations: ['customerDetails', 'customerDetails._addresses'],
+      });
+
+      if (!user) {
+        return {
+          success: false,
+          error: 'User not found',
+        };
+      }
+
+      if (!user.customerDetails) {
+        return {
+          success: false,
+          error: 'User has no customer details',
+        };
+      }
+
+      // Use the getter which handles the underscore prefix
+      const addresses = user.customerDetails.addresses;
+      if (addresses.length === 0) {
+        return {
+          success: false,
+          error: 'User has no addresses',
+        };
+      }
+
+      const address = addresses[0];
+
+      const bookRepository = this.dataSource.getRepository(Book);
+      const book = await bookRepository.findOne({
+        where: { id: body.bookId },
+      });
+
+      if (!book) {
+        return {
+          success: false,
+          error: 'Book not found',
+        };
+      }
+
+      // Create order using static imports (no dynamic import needed)
+      const order = new Order({
+        customer: user.customerDetails,
+        deliveryAddress: address,
+      });
+
+      // Add order item
+      const quantity = body.quantity || 1;
+      order.addItem(
+        new OrderItem({
+          book,
+          quantity,
+        }),
+      );
+
+      // Save order
+      const orderRepository = this.dataSource.getRepository(Order);
+      const savedOrder = await orderRepository.save(order);
+
+      return {
+        success: true,
+        order: {
+          id: savedOrder.id,
+          userId: user.id,
+          finalPrice: savedOrder.getFinalPrice(),
+        },
+      };
+    } catch (error) {
+      console.error('Order creation error:', error);
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Failed to create order',
       };
     }
   }
